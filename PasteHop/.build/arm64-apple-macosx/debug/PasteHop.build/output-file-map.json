@@ -1,0 +1,40 @@
+{
+  "": {
+    "swift-dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/master.swiftdeps"
+  },
+  "/Users/shreeyashs/Dev/PasteHop/PasteHop/PasteHop/ClipboardManager.swift": {
+    "dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ClipboardManager.d",
+    "object": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ClipboardManager.swift.o",
+    "swiftmodule": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ClipboardManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ClipboardManager.swiftdeps",
+    "diagnostics": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ClipboardManager.dia"
+  },
+  "/Users/shreeyashs/Dev/PasteHop/PasteHop/PasteHop/ContentView.swift": {
+    "dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ContentView.d",
+    "object": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ContentView.swift.o",
+    "swiftmodule": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ContentView~partial.swiftmodule",
+    "swift-dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ContentView.swiftdeps",
+    "diagnostics": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/ContentView.dia"
+  },
+  "/Users/shreeyashs/Dev/PasteHop/PasteHop/PasteHop/HotKeyManager.swift": {
+    "dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/HotKeyManager.d",
+    "object": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/HotKeyManager.swift.o",
+    "swiftmodule": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/HotKeyManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/HotKeyManager.swiftdeps",
+    "diagnostics": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/HotKeyManager.dia"
+  },
+  "/Users/shreeyashs/Dev/PasteHop/PasteHop/PasteHop/OverlayWindow.swift": {
+    "dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/OverlayWindow.d",
+    "object": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/OverlayWindow.swift.o",
+    "swiftmodule": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/OverlayWindow~partial.swiftmodule",
+    "swift-dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/OverlayWindow.swiftdeps",
+    "diagnostics": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/OverlayWindow.dia"
+  },
+  "/Users/shreeyashs/Dev/PasteHop/PasteHop/PasteHop/PasteHopApp.swift": {
+    "dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/PasteHopApp.d",
+    "object": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/PasteHopApp.swift.o",
+    "swiftmodule": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/PasteHopApp~partial.swiftmodule",
+    "swift-dependencies": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/PasteHopApp.swiftdeps",
+    "diagnostics": "/Users/shreeyashs/Dev/PasteHop/PasteHop/.build/arm64-apple-macosx/debug/PasteHop.build/PasteHopApp.dia"
+  }
+}

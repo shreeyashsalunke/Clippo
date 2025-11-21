@@ -1,0 +1,149 @@
+import SwiftUI
+import Carbon
+
+@main
+struct PasteHopApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+    var body: some Scene {
+        Settings {
+            EmptyView()
+        }
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var overlayWindow: OverlayWindow!
+    var hostingController: NSHostingController<ContentView>!
+    var selectionIndex: Int = 0 {
+        didSet {
+            // Force UI update
+            hostingController.rootView = ContentView(selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }))
+        }
+    }
+    
+    var statusItem: NSStatusItem!
+    
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Hide dock icon
+        NSApp.setActivationPolicy(.accessory)
+        
+        // Setup UI
+        let contentView = ContentView(selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }))
+        hostingController = NSHostingController(rootView: contentView)
+        
+        overlayWindow = OverlayWindow()
+        overlayWindow.contentViewController = hostingController
+        overlayWindow.setFrame(NSRect(x: 0, y: 0, width: 600, height: 220), display: true)
+        overlayWindow.center()
+        
+        // Setup HotKey
+        HotKeyManager.shared.onHotKeyTriggered = { [weak self] in
+            self?.handleHotKey()
+        }
+        HotKeyManager.shared.setup()
+        
+        // Monitor flags for release
+        NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            self?.handleFlagsChanged(event)
+            return event
+        }
+        
+        // Setup Status Item
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = statusItem.button {
+            button.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "PasteHop")
+        }
+        
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Clear History", action: #selector(clearHistory), keyEquivalent: "c"))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Quit PasteHop", action: #selector(quitApp), keyEquivalent: "q"))
+        statusItem.menu = menu
+    }
+    
+    @objc func clearHistory() {
+        ClipboardManager.shared.history.removeAll()
+    }
+    
+    @objc func quitApp() {
+        NSApp.terminate(nil)
+    }
+    
+    func handleHotKey() {
+        if !overlayWindow.isVisible {
+            // Show window
+            selectionIndex = 0
+            overlayWindow.center()
+            overlayWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        } else {
+            // Cycle selection
+            let count = ClipboardManager.shared.history.count
+            if count > 0 {
+                selectionIndex = (selectionIndex + 1) % count
+            }
+        }
+    }
+    
+    func handleFlagsChanged(_ event: NSEvent) {
+        guard overlayWindow.isVisible else { return }
+        
+        // Check if Cmd is released
+        // We check if the .command flag is NOT present in the current modifiers
+        if !event.modifierFlags.contains(.command) {
+            pasteSelected()
+        }
+    }
+    
+    func pasteSelected() {
+        // 1. Get selected item
+        let history = ClipboardManager.shared.history
+        guard history.indices.contains(selectionIndex) else {
+            overlayWindow.orderOut(nil)
+            return
+        }
+        
+        let item = history[selectionIndex]
+        
+        // 2. Put it on pasteboard
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(item.content, forType: .string)
+        
+        // 3. Hide window
+        overlayWindow.orderOut(nil)
+        NSApp.hide(nil) // Return focus to previous app
+        
+        // 4. Simulate Cmd+V
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.simulatePaste()
+        }
+    }
+    
+    func simulatePaste() {
+        let source = CGEventSource(stateID: .hidSystemState)
+        
+        let vKeyCode: CGKeyCode = 9 // 'V'
+        
+        // Cmd down
+        let cmdDown = CGEvent(keyboardEventSource: source, virtualKey: 0x37, keyDown: true) // 0x37 is Cmd
+        cmdDown?.flags = .maskCommand
+        
+        // V down
+        let vDown = CGEvent(keyboardEventSource: source, virtualKey: vKeyCode, keyDown: true)
+        vDown?.flags = .maskCommand
+        
+        // V up
+        let vUp = CGEvent(keyboardEventSource: source, virtualKey: vKeyCode, keyDown: false)
+        vUp?.flags = .maskCommand
+        
+        // Cmd up
+        let cmdUp = CGEvent(keyboardEventSource: source, virtualKey: 0x37, keyDown: false)
+        
+        cmdDown?.post(tap: .cghidEventTap)
+        vDown?.post(tap: .cghidEventTap)
+        vUp?.post(tap: .cghidEventTap)
+        cmdUp?.post(tap: .cghidEventTap)
+    }
+}
