@@ -31,11 +31,36 @@ struct ContentView: View {
         .padding(.vertical, 48)
         .frame(width: 1504, height: 420)
         .background(
-            Color.white.opacity(0.6)
-                .background(.ultraThinMaterial)
+            ZStack {
+                // Backdrop blur
+                BlurView(radius: 12)
+                
+                // Semi-transparent white overlay
+                Color.white.opacity(0.6)
+            }
         )
         .cornerRadius(24)
         .shadow(color: Color.black.opacity(0.08), radius: 24, x: 0, y: 8)
+    }
+}
+
+struct BlurView: NSViewRepresentable {
+    let radius: CGFloat
+    
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = .menu  // Changed from .hudWindow for better transparency
+        view.blendingMode = .behindWindow
+        view.state = .active
+        view.wantsLayer = true
+        view.layer?.cornerRadius = 24
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.material = .menu
+        nsView.blendingMode = .behindWindow
+        nsView.state = .active
     }
 }
 

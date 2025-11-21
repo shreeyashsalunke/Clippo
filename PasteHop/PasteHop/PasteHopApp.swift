@@ -88,7 +88,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if !overlayWindow.isVisible {
             // Show window
             selectionIndex = 0
-            overlayWindow.center()
+            centerOverlayWindow()
             overlayWindow.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
             
@@ -104,6 +104,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 selectionIndex = (selectionIndex + 1) % count
             }
         }
+    }
+    
+    func centerOverlayWindow() {
+        // Get the screen that contains the mouse pointer
+        guard let screen = NSScreen.main else { return }
+        
+        let screenFrame = screen.visibleFrame
+        let windowFrame = overlayWindow.frame
+        
+        // Calculate center position
+        let x = screenFrame.midX - (windowFrame.width / 2)
+        let y = screenFrame.midY - (windowFrame.height / 2)
+        
+        overlayWindow.setFrameOrigin(NSPoint(x: x, y: y))
     }
     
     func handleFlagsChanged(_ event: NSEvent) {

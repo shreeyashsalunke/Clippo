@@ -15,6 +15,7 @@ class OverlayWindow: NSPanel {
         self.titlebarAppearsTransparent = true
         self.isMovableByWindowBackground = false
         self.backgroundColor = .clear
+        self.isOpaque = false  // Critical for transparency!
         self.hasShadow = true
         self.isReleasedWhenClosed = false
     }
