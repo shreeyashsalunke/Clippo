@@ -25,21 +25,31 @@ class ClipboardManager: ObservableObject {
         if pasteboard.changeCount != lastChangeCount {
             lastChangeCount = pasteboard.changeCount
             
-            if let str = pasteboard.string(forType: .string) {
+            // Check for Image
+            if let data = pasteboard.data(forType: .tiff) {
+                let newItem = ClipboardItem(content: "Image", imageData: data, type: .image, format: .tiff)
+                history.insert(newItem, at: 0)
+                print("Clipboard captured: Image (TIFF)")
+            } else if let data = pasteboard.data(forType: .png) {
+                let newItem = ClipboardItem(content: "Image", imageData: data, type: .image, format: .png)
+                history.insert(newItem, at: 0)
+                print("Clipboard captured: Image (PNG)")
+            }
+            // Check for Text
+            else if let str = pasteboard.string(forType: .string) {
                 // Avoid duplicates if the last item is the same
-                if let lastItem = history.first, lastItem.content == str {
+                if let lastItem = history.first, lastItem.type == .text, lastItem.content == str {
                     return
                 }
                 
-                let newItem = ClipboardItem(content: str, type: .text)
+                let newItem = ClipboardItem(content: str, imageData: nil, type: .text, format: .string)
                 history.insert(newItem, at: 0)
-                
-                // Limit history size
-                if history.count > 50 {
-                    history.removeLast()
-                }
-                
                 print("Clipboard captured: \(str.prefix(20))...")
+            }
+            
+            // Limit history size
+            if history.count > 50 {
+                history.removeLast()
             }
         }
     }
@@ -47,13 +57,15 @@ class ClipboardManager: ObservableObject {
 
 enum ClipboardItemType {
     case text
-    case image // Placeholder for future
+    case image
 }
 
 struct ClipboardItem: Identifiable, Equatable {
     let id = UUID()
     let content: String
+    let imageData: Data?
     let type: ClipboardItemType
+    let format: NSPasteboard.PasteboardType
     let date = Date()
     
     static func == (lhs: ClipboardItem, rhs: ClipboardItem) -> Bool {

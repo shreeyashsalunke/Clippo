@@ -7,60 +7,148 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             if clipboardManager.history.isEmpty {
-                Text("Clipboard is empty")
-                    .foregroundColor(.secondary)
-                    .padding()
+                EmptyStateView()
             } else {
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 15) {
+                        HStack(spacing: 16) {
                             ForEach(Array(clipboardManager.history.enumerated()), id: \.element.id) { index, item in
-                                ClipboardItemView(item: item, isSelected: index == selectionIndex)
+                                ClipboardCard(item: item, isSelected: index == selectionIndex)
                                     .id(index)
                                     .onTapGesture {
                                         selectionIndex = index
                                     }
                             }
                         }
-                        .padding()
+                        .padding(24)
                     }
                     .onChange(of: selectionIndex) { newIndex in
-                        withAnimation {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                             proxy.scrollTo(newIndex, anchor: .center)
                         }
                     }
                 }
             }
         }
-        .frame(height: 180)
+        .frame(minWidth: 400, idealWidth: 800, maxWidth: .infinity, minHeight: 240, idealHeight: 280, maxHeight: 320)
         .background(VisualEffectView(material: .hudWindow, blendingMode: .behindWindow))
-        .cornerRadius(16)
+        .cornerRadius(24)
+        .shadow(color: Color.black.opacity(0.15), radius: 24, x: 0, y: 8)
     }
 }
 
-struct ClipboardItemView: View {
+struct EmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "clipboard")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary.opacity(0.5))
+            Text("Clipboard is empty")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct ClipboardCard: View {
     let item: ClipboardItem
     let isSelected: Bool
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(item.content)
-                .font(.system(size: 12))
-                .lineLimit(6)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        VStack(alignment: .leading, spacing: 12) {
+            // Header with type icon
+            HStack(spacing: 8) {
+                TypeIcon(type: item.type)
+                    .frame(width: 20, height: 20)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                }
+            }
+            
+            // Content Preview
+            if item.type == .image, let data = item.imageData, let nsImage = NSImage(data: data) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
+                    .cornerRadius(8)
+            } else {
+                Text(item.content)
+                    .font(.custom("Inter", size: 14))
+                    .fontWeight(.medium)
+                    .lineLimit(5)
+                    .multilineTextAlignment(.leading)
+                    .foregroundColor(Color(NSColor.labelColor))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
         }
-        .padding(10)
-        .frame(width: 140, height: 120)
-        .background(isSelected ? Color.accentColor.opacity(0.2) : Color(NSColor.controlBackgroundColor).opacity(0.5))
-        .cornerRadius(10)
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
+        .padding(16)
+        .frame(width: 220, height: 200)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(NSColor.controlBackgroundColor).opacity(isSelected ? 1.0 : 0.6))
         )
-        .scaleEffect(isSelected ? 1.05 : 1.0)
-        .shadow(radius: isSelected ? 4 : 0)
-        .animation(.spring(), value: isSelected)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(
+                    isSelected ? Color.accentColor : Color.clear,
+                    lineWidth: 2
+                )
+        )
+        .scaleEffect(isSelected ? 1.03 : 1.0)
+        .shadow(color: isSelected ? Color.accentColor.opacity(0.3) : Color.black.opacity(0.05), 
+                radius: isSelected ? 12 : 4, 
+                x: 0, 
+                y: isSelected ? 6 : 2)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+    }
+}
+
+struct TypeIcon: View {
+    let type: ClipboardItemType
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(iconBackgroundColor)
+                .frame(width: 32, height: 32)
+            
+            Image(systemName: iconName)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(iconColor)
+        }
+    }
+    
+    var iconName: String {
+        switch type {
+        case .text:
+            return "text.alignleft"
+        case .image:
+            return "photo"
+        }
+    }
+    
+    var iconColor: Color {
+        switch type {
+        case .text:
+            return Color.blue
+        case .image:
+            return Color.purple
+        }
+    }
+    
+    var iconBackgroundColor: Color {
+        switch type {
+        case .text:
+            return Color.blue.opacity(0.15)
+        case .image:
+            return Color.purple.opacity(0.15)
+        }
     }
 }
 

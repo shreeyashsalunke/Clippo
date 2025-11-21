@@ -25,6 +25,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Check Accessibility Permissions
+        checkAccessibilityPermissions()
+        
         // Hide dock icon
         NSApp.setActivationPolicy(.accessory)
         
@@ -34,7 +37,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         overlayWindow = OverlayWindow()
         overlayWindow.contentViewController = hostingController
-        overlayWindow.setFrame(NSRect(x: 0, y: 0, width: 600, height: 220), display: true)
+        overlayWindow.setFrame(NSRect(x: 0, y: 0, width: 900, height: 320), display: true)
         overlayWindow.center()
         
         // Setup HotKey
@@ -60,6 +63,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit PasteHop", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem.menu = menu
+    }
+    
+    func checkAccessibilityPermissions() {
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String : true]
+        let accessEnabled = AXIsProcessTrustedWithOptions(options)
+        
+        if !accessEnabled {
+            print("Accessibility not enabled")
+        }
     }
     
     @objc func clearHistory() {
@@ -109,15 +121,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // 2. Put it on pasteboard
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.setString(item.content, forType: .string)
+        
+        if item.type == .image, let data = item.imageData {
+            pasteboard.setData(data, forType: item.format)
+        } else {
+            pasteboard.setString(item.content, forType: .string)
+        }
         
         // 3. Hide window
         overlayWindow.orderOut(nil)
         NSApp.hide(nil) // Return focus to previous app
         
-        // 4. Simulate Cmd+V
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.simulatePaste()
+        // 4. Simulate Cmd+V if we have permission
+        if AXIsProcessTrusted() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                self.simulatePaste()
+            }
+        } else {
+            print("Accessibility permission missing. Item copied to clipboard but not pasted.")
         }
     }
     
