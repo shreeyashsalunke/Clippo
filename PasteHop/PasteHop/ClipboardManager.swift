@@ -40,6 +40,15 @@ class ClipboardManager: ObservableObject {
     }
     
     private func detectTextType(_ text: String) -> ClipboardItemType {
+        // Trim whitespace for cleaner detection
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // URL detection
+        let urlPattern = #"^(https?|ftp)://[^\s/$.?#].[^\s]*$"#
+        if let _ = trimmed.range(of: urlPattern, options: .regularExpression) {
+            return .url
+        }
+        
         // Code detection heuristics
         let codeIndicators = [
             text.contains("func "),
@@ -66,9 +75,9 @@ class ClipboardManager: ObservableObject {
     private func handleNewClipboardItem(content: String, imageData: Data?, type: ClipboardItemType, format: NSPasteboard.PasteboardType) {
         // Check if this exact item already exists in history
         if let existingIndex = history.firstIndex(where: { item in
-            if type == .text || type == .code {
-                // For text/code, compare content
-                return (item.type == .text || item.type == .code) && item.content == content
+            if type == .text || type == .code || type == .url {
+                // For text/code/url, compare content
+                return (item.type == .text || item.type == .code || item.type == .url) && item.content == content
             } else if type == .image, let newData = imageData, let existingData = item.imageData {
                 // For images, compare data
                 return item.type == .image && existingData == newData
@@ -96,6 +105,7 @@ class ClipboardManager: ObservableObject {
 enum ClipboardItemType {
     case text
     case code
+    case url
     case image
 }
 

@@ -201,6 +201,8 @@ struct ClipboardCard: View {
             return "Text"
         case .code:
             return "Code"
+        case .url:
+            return "URL"
         case .image:
             return "Image"
         }
@@ -214,7 +216,6 @@ struct IconBadge: View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color(hex: "fdfdfd"))
-                .frame(width: 40, height: 40)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color(hex: "d5d7da"), lineWidth: 1)
@@ -231,9 +232,11 @@ struct IconBadge: View {
     var iconName: String {
         switch type {
         case .text:
-            return "doc.text"
+            return "textformat"
         case .code:
             return "chevron.left.forwardslash.chevron.right"
+        case .url:
+            return "link"
         case .image:
             return "photo"
         }
