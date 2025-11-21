@@ -82,6 +82,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.terminate(nil)
     }
     
+    var hideTimer: Timer?
+    
     func handleHotKey() {
         if !overlayWindow.isVisible {
             // Show window
@@ -89,6 +91,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             overlayWindow.center()
             overlayWindow.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
+            
+            // Safety timeout: auto-hide after 10 seconds
+            hideTimer?.invalidate()
+            hideTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+                self?.dismissOverlay()
+            }
         } else {
             // Cycle selection
             let count = ClipboardManager.shared.history.count
@@ -101,14 +109,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func handleFlagsChanged(_ event: NSEvent) {
         guard overlayWindow.isVisible else { return }
         
-        // Check if Cmd is released
-        // We check if the .command flag is NOT present in the current modifiers
-        if !event.modifierFlags.contains(.command) {
+        // Check if BOTH Cmd AND Shift are released
+        let hasCommand = event.modifierFlags.contains(.command)
+        let hasShift = event.modifierFlags.contains(.shift)
+        
+        if !hasCommand || !hasShift {
             pasteSelected()
         }
     }
     
+    func dismissOverlay() {
+        hideTimer?.invalidate()
+        hideTimer = nil
+        
+        if overlayWindow.isVisible {
+            overlayWindow.orderOut(nil)
+        }
+    }
+    
     func pasteSelected() {
+        // Cancel the safety timer
+        hideTimer?.invalidate()
+        hideTimer = nil
+        
         // 1. Get selected item
         let history = ClipboardManager.shared.history
         guard history.indices.contains(selectionIndex) else {
