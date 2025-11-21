@@ -25,16 +25,18 @@ struct ContentView: View {
             }
             
             // Footer: Keyboard Instructions
-            HStack(spacing: 8) {
-                Text("Press")
-                    .instructionText()
-                KeyBadge(text: "v")
-                Text("while pressing")
-                    .instructionText()
-                KeyBadge(text: "⌘")
-                KeyBadge(text: "⇧")
-                Text("to hop to next")
-                    .instructionText()
+            if clipboardManager.history.count > 1 {
+                HStack(spacing: 8) {
+                    Text("Press")
+                        .instructionText()
+                    KeyBadge(text: "v")
+                    Text("while pressing")
+                        .instructionText()
+                    KeyBadge(text: "⌘")
+                    KeyBadge(text: "⇧")
+                    Text("to hop to next")
+                        .instructionText()
+                }
             }
         }
         .padding(.horizontal, 64)
