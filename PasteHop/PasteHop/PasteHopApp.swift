@@ -86,6 +86,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func handleHotKey() {
         if !overlayWindow.isVisible {
+            // Update window size before showing
+            updateWindowFrame()
+            
             // Show window
             selectionIndex = 0
             centerOverlayWindow()
@@ -104,6 +107,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 selectionIndex = (selectionIndex + 1) % count
             }
         }
+    }
+    
+    func updateWindowFrame() {
+        let count = max(1, CGFloat(ClipboardManager.shared.history.count))
+        let cardWidth: CGFloat = 256
+        let spacing: CGFloat = 24
+        let padding: CGFloat = 128 // 64 * 2
+        
+        let newWidth = (count * cardWidth) + ((count - 1) * spacing) + padding
+        let newHeight: CGFloat = 420
+        
+        let currentFrame = overlayWindow.frame
+        let newFrame = NSRect(x: currentFrame.minX, y: currentFrame.minY, width: newWidth, height: newHeight)
+        
+        overlayWindow.setFrame(newFrame, display: true)
     }
     
     func centerOverlayWindow() {

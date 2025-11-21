@@ -6,9 +6,6 @@ struct ContentView: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            // Command Bar Header
-            CommandBarHeader()
-            
             // Card Grid
             if clipboardManager.history.isEmpty {
                 EmptyStateView()
@@ -26,10 +23,23 @@ struct ContentView: View {
                     }
                 }
             }
+            
+            // Footer: Keyboard Instructions
+            HStack(spacing: 8) {
+                Text("Press")
+                    .instructionText()
+                KeyBadge(text: "v")
+                Text("while pressing")
+                    .instructionText()
+                KeyBadge(text: "⌘")
+                KeyBadge(text: "⇧")
+                Text("to hop to next")
+                    .instructionText()
+            }
         }
         .padding(.horizontal, 64)
         .padding(.vertical, 48)
-        .frame(width: 1504, height: 420)
+        .frame(width: calculateWidth(), height: 420)
         .background(
             ZStack {
                 // Backdrop blur
@@ -41,6 +51,15 @@ struct ContentView: View {
         )
         .cornerRadius(24)
         .shadow(color: Color.black.opacity(0.08), radius: 24, x: 0, y: 8)
+    }
+    
+    private func calculateWidth() -> CGFloat {
+        let count = max(1, CGFloat(clipboardManager.history.count))
+        let cardWidth: CGFloat = 256
+        let spacing: CGFloat = 24
+        let padding: CGFloat = 128 // 64 * 2
+        
+        return (count * cardWidth) + ((count - 1) * spacing) + padding
     }
 }
 
@@ -64,43 +83,7 @@ struct BlurView: NSViewRepresentable {
     }
 }
 
-struct CommandBarHeader: View {
-    var body: some View {
-        HStack {
-            // Left: Logo + App Name
-            HStack(spacing: 8) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(hex: "7f56d9"))
-                    Image(systemName: "doc.on.clipboard")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                }
-                .frame(width: 28, height: 28)
-                
-                Text("PasteHop")
-                    .font(.custom("Inter", size: 18))
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color(hex: "181d27"))
-            }
-            
-            Spacer()
-            
-            // Right: Keyboard Instructions
-            HStack(spacing: 8) {
-                Text("Press")
-                    .instructionText()
-                KeyBadge(text: "v")
-                Text("while pressing")
-                    .instructionText()
-                KeyBadge(text: "⌘")
-                KeyBadge(text: "⇧")
-                Text("to hop to next")
-                    .instructionText()
-            }
-        }
-    }
-}
+// Removed CommandBarHeader struct
 
 struct KeyBadge: View {
     let text: String
