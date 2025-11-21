@@ -37,6 +37,7 @@ struct ContentView: View {
                     Text("to hop to next")
                         .instructionText()
                 }
+                .padding(.top, 16)
             }
         }
         .padding(.horizontal, 64)
