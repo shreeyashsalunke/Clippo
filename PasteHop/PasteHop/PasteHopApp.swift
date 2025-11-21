@@ -37,7 +37,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         overlayWindow = OverlayWindow()
         overlayWindow.contentViewController = hostingController
-        overlayWindow.setFrame(NSRect(x: 0, y: 0, width: 1220, height: 320), display: true)
+        overlayWindow.setFrame(NSRect(x: 0, y: 0, width: 1504, height: 420), display: true)
         overlayWindow.center()
         
         // Setup HotKey

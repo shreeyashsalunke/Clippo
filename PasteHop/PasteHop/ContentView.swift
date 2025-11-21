@@ -29,7 +29,7 @@ struct ContentView: View {
         }
         .padding(.horizontal, 64)
         .padding(.vertical, 48)
-        .frame(width: 1220, height: 420)
+        .frame(width: 1504, height: 420)
         .background(
             Color.white.opacity(0.6)
                 .background(.ultraThinMaterial)
