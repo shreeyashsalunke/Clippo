@@ -248,10 +248,17 @@ struct ContentPreview: View {
                 .shadow(color: Color.black.opacity(0.04), radius: 1.5, x: 0, y: 3)
             
             if item.type == .image, let data = item.imageData, let nsImage = NSImage(data: data) {
+                let imageSize = nsImage.size
+                let isPortrait = imageSize.height > imageSize.width
+                
                 Image(nsImage: nsImage)
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 224, height: 160)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(
+                        maxWidth: isPortrait ? nil : 224,
+                        maxHeight: isPortrait ? 160 : nil
+                    )
+                    .frame(width: 224, height: 160)  // Container frame
                     .clipped()
                     .cornerRadius(8)
             } else {
