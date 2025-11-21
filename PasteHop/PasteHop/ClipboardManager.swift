@@ -60,8 +60,8 @@ class ClipboardManager: ObservableObject {
             history.insert(newItem, at: 0)
             print("Clipboard captured: \(content.prefix(20))...")
             
-            // Limit history size
-            if history.count > 50 {
+            // Limit history size to 5 items
+            if history.count > 5 {
                 history.removeLast()
             }
         }
