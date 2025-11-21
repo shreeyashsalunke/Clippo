@@ -33,17 +33,42 @@ class ClipboardManager: ObservableObject {
             }
             // Check for Text
             else if let str = pasteboard.string(forType: .string) {
-                handleNewClipboardItem(content: str, imageData: nil, type: .text, format: .string)
+                let detectedType = detectTextType(str)
+                handleNewClipboardItem(content: str, imageData: nil, type: detectedType, format: .string)
             }
         }
+    }
+    
+    private func detectTextType(_ text: String) -> ClipboardItemType {
+        // Code detection heuristics
+        let codeIndicators = [
+            text.contains("func "),
+            text.contains("class "),
+            text.contains("import "),
+            text.contains("const "),
+            text.contains("let "),
+            text.contains("var "),
+            text.contains("function "),
+            text.contains("def "),
+            text.contains("public "),
+            text.contains("private "),
+            text.contains("{") && text.contains("}"),
+            text.contains("=>"),
+            text.contains("//") || text.contains("/*"),
+            text.range(of: #"^\s*(import|from|export|const|let|var|function|class|def|public|private)"#, options: .regularExpression) != nil
+        ]
+        
+        // If 2 or more indicators are present, consider it code
+        let indicatorCount = codeIndicators.filter { $0 }.count
+        return indicatorCount >= 2 ? .code : .text
     }
     
     private func handleNewClipboardItem(content: String, imageData: Data?, type: ClipboardItemType, format: NSPasteboard.PasteboardType) {
         // Check if this exact item already exists in history
         if let existingIndex = history.firstIndex(where: { item in
-            if type == .text {
-                // For text, compare content
-                return item.type == .text && item.content == content
+            if type == .text || type == .code {
+                // For text/code, compare content
+                return (item.type == .text || item.type == .code) && item.content == content
             } else if type == .image, let newData = imageData, let existingData = item.imageData {
                 // For images, compare data
                 return item.type == .image && existingData == newData
@@ -70,6 +95,7 @@ class ClipboardManager: ObservableObject {
 
 enum ClipboardItemType {
     case text
+    case code
     case image
 }
 

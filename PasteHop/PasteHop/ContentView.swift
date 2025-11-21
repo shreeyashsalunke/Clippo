@@ -199,6 +199,8 @@ struct ClipboardCard: View {
         switch item.type {
         case .text:
             return "Text"
+        case .code:
+            return "Code"
         case .image:
             return "Image"
         }
@@ -230,6 +232,8 @@ struct IconBadge: View {
         switch type {
         case .text:
             return "doc.text"
+        case .code:
+            return "chevron.left.forwardslash.chevron.right"
         case .image:
             return "photo"
         }
@@ -261,7 +265,16 @@ struct ContentPreview: View {
                     .frame(width: 224, height: 160)  // Container frame
                     .clipped()
                     .cornerRadius(8)
+            } else if item.type == .code {
+                // Code with syntax highlighting
+                SyntaxHighlightedText(code: item.content)
+                    .font(.custom("Menlo", size: 12))
+                    .lineLimit(10)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(16)
             } else {
+                // Regular text
                 Text(item.content)
                     .font(.custom("Inter", size: 14))
                     .fontWeight(.regular)
@@ -270,6 +283,53 @@ struct ContentPreview: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(16)
+            }
+        }
+    }
+}
+
+struct SyntaxHighlightedText: View {
+    let code: String
+    
+    var body: some View {
+        Text(highlightedCode())
+            .foregroundColor(Color(hex: "181d27"))
+    }
+    
+    func highlightedCode() -> AttributedString {
+        var attributed = AttributedString(code)
+        
+        // Keywords (pink/magenta)
+        let keywords = ["import", "export", "const", "let", "var", "function", "class", "func", "def", "public", "private", "static", "async", "await", "return", "if", "else", "for", "while", "switch", "case", "break", "continue", "new", "this", "self", "from", "as", "default"]
+        
+        for keyword in keywords {
+            highlightPattern("\\b\(keyword)\\b", in: &attributed, color: Color(hex: "dd2590"))
+        }
+        
+        // Strings (blue)
+        highlightPattern("\"[^\"]*\"", in: &attributed, color: Color(hex: "1570ef"))
+        highlightPattern("'[^']*'", in: &attributed, color: Color(hex: "1570ef"))
+        highlightPattern("`[^`]*`", in: &attributed, color: Color(hex: "1570ef"))
+        
+        // Comments (green)
+        highlightPattern("//.*$", in: &attributed, color: Color(hex: "079455"))
+        highlightPattern("/\\*.*?\\*/", in: &attributed, color: Color(hex: "079455"))
+        highlightPattern("#.*$", in: &attributed, color: Color(hex: "079455"))
+        
+        return attributed
+    }
+    
+    func highlightPattern(_ pattern: String, in attributedString: inout AttributedString, color: Color) {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.anchorsMatchLines]) else { return }
+        
+        let nsString = NSString(string: String(attributedString.characters))
+        let matches = regex.matches(in: String(attributedString.characters), range: NSRange(location: 0, length: nsString.length))
+        
+        for match in matches.reversed() {
+            if let range = Range(match.range, in: String(attributedString.characters)) {
+                if let attrRange = Range(range, in: attributedString) {
+                    attributedString[attrRange].foregroundColor = color
+                }
             }
         }
     }
