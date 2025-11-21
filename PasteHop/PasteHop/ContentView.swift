@@ -48,10 +48,10 @@ struct ContentView: View {
         .background(
             ZStack {
                 // Backdrop blur
-                BlurView(radius: 12)
+                Color.clear.background(.ultraThinMaterial)
                 
                 // Semi-transparent white overlay
-                Color.white.opacity(0.6)
+                Color.white.opacity(0.2)
             }
         )
         .cornerRadius(24)
@@ -68,25 +68,7 @@ struct ContentView: View {
     }
 }
 
-struct BlurView: NSViewRepresentable {
-    let radius: CGFloat
-    
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.material = .menu  // Changed from .hudWindow for better transparency
-        view.blendingMode = .behindWindow
-        view.state = .active
-        view.wantsLayer = true
-        view.layer?.cornerRadius = 24
-        return view
-    }
-    
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-        nsView.material = .menu
-        nsView.blendingMode = .behindWindow
-        nsView.state = .active
-    }
-}
+
 
 // Removed CommandBarHeader struct
 
