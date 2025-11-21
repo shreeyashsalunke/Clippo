@@ -1,1 +1,2 @@
 # PasteHop
+Project Details
