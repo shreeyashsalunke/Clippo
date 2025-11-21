@@ -4,6 +4,7 @@ struct ContentView: View {
     @ObservedObject var clipboardManager = ClipboardManager.shared
     @Binding var selectionIndex: Int
     @Binding var isPasting: Bool
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(spacing: 24) {
@@ -51,7 +52,7 @@ struct ContentView: View {
                 Color.clear.background(.ultraThinMaterial)
                 
                 // Semi-transparent white overlay
-                Color.themeOverlayTint
+                Color.themeOverlayTint(for: colorScheme)
             }
         )
         .cornerRadius(24)
@@ -74,19 +75,20 @@ struct ContentView: View {
 
 struct KeyBadge: View {
     let text: String
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Text(text)
             .font(.custom("Inter", size: 14))
             .fontWeight(.semibold)
-            .foregroundColor(.themeTextSecondary)
+            .foregroundColor(.themeTextSecondary(for: colorScheme))
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
-            .background(Color.themeKeyBg)
+            .background(Color.themeKeyBg(for: colorScheme))
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.themeBorder, lineWidth: 1)
+                    .stroke(Color.themeBorder(for: colorScheme), lineWidth: 1)
             )
     }
 }
@@ -110,6 +112,7 @@ struct ClipboardCard: View {
     let isSelected: Bool
     let showPasteButton: Bool
     let isPasting: Bool
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(spacing: 0) {
@@ -122,7 +125,7 @@ struct ClipboardCard: View {
                 Text(typeLabel)
                     .font(.custom("Inter", size: 14))
                     .fontWeight(.medium)
-                    .foregroundColor(Color.themeTextPrimary)
+                    .foregroundColor(Color.themeTextPrimary(for: colorScheme))
                 
                 Spacer()
             }
@@ -135,7 +138,7 @@ struct ClipboardCard: View {
                 .frame(width: 256, height: 192)
         }
         .frame(width: 256, height: 256)
-        .background(Color.themeCardBg)
+        .background(Color.themeCardBg(for: colorScheme))
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 1.5, x: 0, y: 1)
         .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
@@ -143,10 +146,10 @@ struct ClipboardCard: View {
             Group {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.themeKeyBg, lineWidth: 2)
+                        .stroke(Color.themeKeyBg(for: colorScheme), lineWidth: 2)
                         .padding(-2)
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(isPasting ? Color.green : .themeSelectionRing, lineWidth: 4)
+                        .stroke(isPasting ? Color.green : .themeSelectionRing(for: colorScheme), lineWidth: 4)
                         .padding(-6)
                 }
             }
@@ -182,20 +185,21 @@ struct ClipboardCard: View {
 
 struct IconBadge: View {
     let type: ClipboardItemType
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.themeIconBg)
+                .fill(Color.themeIconBg(for: colorScheme))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.themeIconBorder, lineWidth: 1)
+                        .stroke(Color.themeIconBorder(for: colorScheme), lineWidth: 1)
                 )
                 .shadow(color: Color.black.opacity(0.05), radius: 0, x: 0, y: -2)
             
             Image(systemName: iconName)
                 .font(.system(size: 20, weight: .regular))
-                .foregroundColor(Color.themeTextPrimary)
+                .foregroundColor(Color.themeTextPrimary(for: colorScheme))
         }
         .frame(width: 40, height: 40)
     }
@@ -216,11 +220,12 @@ struct IconBadge: View {
 
 struct ContentPreview: View {
     let item: ClipboardItem
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.themeKeyBg)
+                .fill(Color.themeKeyBg(for: colorScheme))
                 .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 20)
                 .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 8)
                 .shadow(color: Color.black.opacity(0.04), radius: 1.5, x: 0, y: 3)
@@ -252,7 +257,7 @@ struct ContentPreview: View {
                 Text(item.content)
                     .font(.custom("Inter", size: 14))
                     .fontWeight(.regular)
-                    .foregroundColor(Color.themeTextPrimary)
+                    .foregroundColor(Color.themeTextPrimary(for: colorScheme))
                     .lineLimit(8)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -264,10 +269,11 @@ struct ContentPreview: View {
 
 struct SyntaxHighlightedText: View {
     let code: String
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Text(highlightedCode())
-            .foregroundColor(Color.themeTextPrimary)
+            .foregroundColor(Color.themeTextPrimary(for: colorScheme))
     }
     
     func highlightedCode() -> AttributedString {
@@ -311,6 +317,7 @@ struct SyntaxHighlightedText: View {
 
 struct PasteButton: View {
     var isPasting: Bool
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack(spacing: 6) {
@@ -323,10 +330,10 @@ struct PasteButton: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(isPasting ? Color.green : .themeAccent)
+        .background(isPasting ? Color.green : .themeAccent(for: colorScheme))
         .foregroundColor(.white)
         .cornerRadius(8)
-        .shadow(color: Color.themeAccent.opacity(0.24), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.themeAccent(for: colorScheme).opacity(0.24), radius: 8, x: 0, y: 4)
         .scaleEffect(isPasting ? 1.1 : 1.0)
         .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isPasting)
     }
@@ -380,10 +387,19 @@ extension Color {
 
 extension Text {
     func instructionText() -> some View {
-        self
+        InstructionTextModifier(text: self)
+    }
+}
+
+struct InstructionTextModifier: View {
+    let text: Text
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        text
             .font(.custom("Inter", size: 14))
             .fontWeight(.semibold)
-            .foregroundColor(.themeTextSecondary)
+            .foregroundColor(.themeTextSecondary(for: colorScheme))
     }
 }
 
@@ -419,14 +435,43 @@ extension NSColor {
 }
 
 extension Color {
-    static let themeTextPrimary = Color(nsColor: .dynamic(light: NSColor(hex: "181d27"), dark: NSColor(hex: "F9FAFB")))
-    static let themeTextSecondary = Color(nsColor: .dynamic(light: NSColor(hex: "475467"), dark: NSColor(hex: "98A2B3")))
-    static let themeCardBg = Color(nsColor: .dynamic(light: NSColor(hex: "f5f5f5"), dark: NSColor(hex: "161b26")))
-    static let themeBorder = Color(nsColor: .dynamic(light: NSColor(hex: "e9eaeb"), dark: NSColor(hex: "344054")))
-    static let themeAccent = Color(nsColor: .dynamic(light: NSColor(hex: "7f56d9"), dark: NSColor(hex: "9E77ED")))
-    static let themeIconBg = Color(nsColor: .dynamic(light: NSColor(hex: "fdfdfd"), dark: NSColor(hex: "101828")))
-    static let themeIconBorder = Color(nsColor: .dynamic(light: NSColor(hex: "d5d7da"), dark: NSColor(hex: "344054")))
-    static let themeKeyBg = Color(nsColor: .dynamic(light: .white, dark: NSColor(hex: "1D2939")))
-    static let themeOverlayTint = Color(nsColor: .dynamic(light: NSColor(white: 1, alpha: 0.2), dark: NSColor(white: 0, alpha: 0.2)))
-    static let themeSelectionRing = Color(nsColor: .dynamic(light: NSColor(hex: "9e77ed"), dark: NSColor(hex: "B692F6")))
+    static func themeTextPrimary(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "F9FAFB") : Color(hex: "181d27")
+    }
+    
+    static func themeTextSecondary(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "98A2B3") : Color(hex: "475467")
+    }
+    
+    static func themeCardBg(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "161b26") : Color(hex: "f5f5f5")
+    }
+    
+    static func themeBorder(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "344054") : Color(hex: "e9eaeb")
+    }
+    
+    static func themeAccent(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "9E77ED") : Color(hex: "7f56d9")
+    }
+    
+    static func themeIconBg(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "101828") : Color(hex: "fdfdfd")
+    }
+    
+    static func themeIconBorder(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "344054") : Color(hex: "d5d7da")
+    }
+    
+    static func themeKeyBg(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "1D2939") : .white
+    }
+    
+    static func themeOverlayTint(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color.black.opacity(0.2) : Color.white.opacity(0.2)
+    }
+    
+    static func themeSelectionRing(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "B692F6") : Color(hex: "9e77ed")
+    }
 }

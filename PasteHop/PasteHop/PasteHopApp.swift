@@ -59,7 +59,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applyAppearance() {
-        NSApp.appearance = currentAppearance.nsAppearance
+        let appearance = currentAppearance.nsAppearance
+        NSApp.appearance = appearance
+        overlayWindow?.appearance = appearance
+        
+        // Force view update to pick up new appearance
+        if hostingController != nil {
+            updateView()
+        }
     }
     
     var statusItem: NSStatusItem!
