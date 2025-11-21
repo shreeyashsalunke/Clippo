@@ -15,11 +15,19 @@ struct PasteHopApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindow: OverlayWindow!
     var hostingController: NSHostingController<ContentView>!
+    var isPasting: Bool = false {
+        didSet { updateView() }
+    }
+    
     var selectionIndex: Int = 0 {
-        didSet {
-            // Force UI update
-            hostingController.rootView = ContentView(selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }))
-        }
+        didSet { updateView() }
+    }
+    
+    func updateView() {
+        hostingController.rootView = ContentView(
+            selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }),
+            isPasting: Binding(get: { self.isPasting }, set: { self.isPasting = $0 })
+        )
     }
     
     var statusItem: NSStatusItem!
@@ -32,7 +40,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         
         // Setup UI
-        let contentView = ContentView(selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }))
+        let contentView = ContentView(
+            selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }),
+            isPasting: Binding(get: { self.isPasting }, set: { self.isPasting = $0 })
+        )
         hostingController = NSHostingController(rootView: contentView)
         
         overlayWindow = OverlayWindow()
@@ -146,7 +157,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let hasShift = event.modifierFlags.contains(.shift)
         
         if !hasCommand || !hasShift {
-            pasteSelected()
+            if isPasting { return }
+            
+            // Trigger animation
+            isPasting = true
+            
+            // Wait for animation then paste
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                self.pasteSelected()
+                self.isPasting = false
+            }
         }
     }
     

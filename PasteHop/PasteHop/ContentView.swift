@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var clipboardManager = ClipboardManager.shared
     @Binding var selectionIndex: Int
+    @Binding var isPasting: Bool
     
     var body: some View {
         VStack(spacing: 24) {
@@ -15,7 +16,8 @@ struct ContentView: View {
                         ClipboardCard(
                             item: item,
                             isSelected: index == selectionIndex,
-                            showPasteButton: index == selectionIndex
+                            showPasteButton: index == selectionIndex,
+                            isPasting: isPasting && index == selectionIndex
                         )
                         .onTapGesture {
                             selectionIndex = index
@@ -125,6 +127,7 @@ struct ClipboardCard: View {
     let item: ClipboardItem
     let isSelected: Bool
     let showPasteButton: Bool
+    let isPasting: Bool
     
     var body: some View {
         VStack(spacing: 0) {
@@ -161,7 +164,7 @@ struct ClipboardCard: View {
                         .stroke(Color.white, lineWidth: 2)
                         .padding(-2)
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(Color(hex: "9e77ed"), lineWidth: 4)
+                        .stroke(isPasting ? Color.green : Color(hex: "9e77ed"), lineWidth: 4)
                         .padding(-6)
                 }
             }
@@ -172,7 +175,7 @@ struct ClipboardCard: View {
                 if showPasteButton {
                     VStack {
                         Spacer()
-                        PasteButton()
+                        PasteButton(isPasting: isPasting)
                             .offset(y: 20)
                     }
                 }
@@ -325,29 +328,25 @@ struct SyntaxHighlightedText: View {
 }
 
 struct PasteButton: View {
+    var isPasting: Bool
+    
     var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: "doc.on.clipboard")
-                .font(.system(size: 20))
-                .foregroundColor(.white)
-            
-            Text("Release to Paste")
+        HStack(spacing: 6) {
+            Image(systemName: isPasting ? "checkmark" : "doc.on.clipboard")
+                .font(.system(size: 14, weight: .semibold))
+            Text(isPasting ? "Pasted!" : "Release to Paste")
                 .font(.custom("Inter", size: 14))
                 .fontWeight(.semibold)
-                .foregroundColor(.white)
+                .padding(.trailing, isPasting ? 8 : 0)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(hex: "7f56d9"))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 2)
-                )
-                .shadow(color: Color.black.opacity(0.18), radius: 0, x: 0, y: 0)
-                .shadow(color: Color.black.opacity(0.05), radius: 0, x: 0, y: -2)
-        )
+        .background(isPasting ? Color.green : Color(hex: "7f56d9"))
+        .foregroundColor(.white)
+        .cornerRadius(8)
+        .shadow(color: Color(hex: "7f56d9").opacity(0.24), radius: 8, x: 0, y: 4)
+        .scaleEffect(isPasting ? 1.1 : 1.0)
+        .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isPasting)
     }
 }
 
