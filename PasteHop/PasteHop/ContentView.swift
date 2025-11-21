@@ -51,7 +51,7 @@ struct ContentView: View {
                 Color.clear.background(.ultraThinMaterial)
                 
                 // Semi-transparent white overlay
-                Color.white.opacity(0.2)
+                Color.themeOverlayTint
             }
         )
         .cornerRadius(24)
@@ -79,14 +79,14 @@ struct KeyBadge: View {
         Text(text)
             .font(.custom("Inter", size: 14))
             .fontWeight(.semibold)
-            .foregroundColor(Color(hex: "a4a7ae"))
+            .foregroundColor(.themeTextSecondary)
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
-            .background(Color.white)
+            .background(Color.themeKeyBg)
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color(hex: "e9eaeb"), lineWidth: 1)
+                    .stroke(Color.themeBorder, lineWidth: 1)
             )
     }
 }
@@ -122,7 +122,7 @@ struct ClipboardCard: View {
                 Text(typeLabel)
                     .font(.custom("Inter", size: 14))
                     .fontWeight(.medium)
-                    .foregroundColor(Color(hex: "181d27"))
+                    .foregroundColor(Color.themeTextPrimary)
                 
                 Spacer()
             }
@@ -135,7 +135,7 @@ struct ClipboardCard: View {
                 .frame(width: 256, height: 192)
         }
         .frame(width: 256, height: 256)
-        .background(Color(hex: "f5f5f5"))
+        .background(Color.themeCardBg)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 1.5, x: 0, y: 1)
         .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
@@ -143,10 +143,10 @@ struct ClipboardCard: View {
             Group {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white, lineWidth: 2)
+                        .stroke(Color.themeKeyBg, lineWidth: 2)
                         .padding(-2)
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(isPasting ? Color.green : Color(hex: "9e77ed"), lineWidth: 4)
+                        .stroke(isPasting ? Color.green : .themeSelectionRing, lineWidth: 4)
                         .padding(-6)
                 }
             }
@@ -186,16 +186,16 @@ struct IconBadge: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color(hex: "fdfdfd"))
+                .fill(Color.themeIconBg)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color(hex: "d5d7da"), lineWidth: 1)
+                        .stroke(Color.themeIconBorder, lineWidth: 1)
                 )
                 .shadow(color: Color.black.opacity(0.05), radius: 0, x: 0, y: -2)
             
             Image(systemName: iconName)
                 .font(.system(size: 20, weight: .regular))
-                .foregroundColor(Color(hex: "181d27"))
+                .foregroundColor(Color.themeTextPrimary)
         }
         .frame(width: 40, height: 40)
     }
@@ -220,7 +220,7 @@ struct ContentPreview: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white)
+                .fill(Color.themeKeyBg)
                 .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 20)
                 .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 8)
                 .shadow(color: Color.black.opacity(0.04), radius: 1.5, x: 0, y: 3)
@@ -252,7 +252,7 @@ struct ContentPreview: View {
                 Text(item.content)
                     .font(.custom("Inter", size: 14))
                     .fontWeight(.regular)
-                    .foregroundColor(Color(hex: "181d27"))
+                    .foregroundColor(Color.themeTextPrimary)
                     .lineLimit(8)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -267,7 +267,7 @@ struct SyntaxHighlightedText: View {
     
     var body: some View {
         Text(highlightedCode())
-            .foregroundColor(Color(hex: "181d27"))
+            .foregroundColor(Color.themeTextPrimary)
     }
     
     func highlightedCode() -> AttributedString {
@@ -323,10 +323,10 @@ struct PasteButton: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(isPasting ? Color.green : Color(hex: "7f56d9"))
+        .background(isPasting ? Color.green : .themeAccent)
         .foregroundColor(.white)
         .cornerRadius(8)
-        .shadow(color: Color(hex: "7f56d9").opacity(0.24), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.themeAccent.opacity(0.24), radius: 8, x: 0, y: 4)
         .scaleEffect(isPasting ? 1.1 : 1.0)
         .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isPasting)
     }
@@ -383,6 +383,50 @@ extension Text {
         self
             .font(.custom("Inter", size: 14))
             .fontWeight(.semibold)
-            .foregroundColor(Color(hex: "717680"))
+            .foregroundColor(.themeTextSecondary)
     }
+}
+
+extension NSColor {
+    convenience init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(
+            srgbRed: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            alpha: Double(a) / 255
+        )
+    }
+    
+    static func dynamic(light: NSColor, dark: NSColor) -> NSColor {
+        NSColor(name: nil, dynamicProvider: { appearance in
+            appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light
+        })
+    }
+}
+
+extension Color {
+    static let themeTextPrimary = Color(nsColor: .dynamic(light: NSColor(hex: "181d27"), dark: NSColor(hex: "F9FAFB")))
+    static let themeTextSecondary = Color(nsColor: .dynamic(light: NSColor(hex: "717680"), dark: NSColor(hex: "98A2B3")))
+    static let themeCardBg = Color(nsColor: .dynamic(light: NSColor(hex: "f5f5f5"), dark: NSColor(hex: "161b26")))
+    static let themeBorder = Color(nsColor: .dynamic(light: NSColor(hex: "e9eaeb"), dark: NSColor(hex: "344054")))
+    static let themeAccent = Color(nsColor: .dynamic(light: NSColor(hex: "7f56d9"), dark: NSColor(hex: "9E77ED")))
+    static let themeIconBg = Color(nsColor: .dynamic(light: NSColor(hex: "fdfdfd"), dark: NSColor(hex: "101828")))
+    static let themeIconBorder = Color(nsColor: .dynamic(light: NSColor(hex: "d5d7da"), dark: NSColor(hex: "344054")))
+    static let themeKeyBg = Color(nsColor: .dynamic(light: .white, dark: NSColor(hex: "1D2939")))
+    static let themeOverlayTint = Color(nsColor: .dynamic(light: NSColor(white: 1, alpha: 0.2), dark: NSColor(white: 0, alpha: 0.2)))
+    static let themeSelectionRing = Color(nsColor: .dynamic(light: NSColor(hex: "9e77ed"), dark: NSColor(hex: "B692F6")))
 }

@@ -12,6 +12,20 @@ struct PasteHopApp: App {
     }
 }
 
+enum AppAppearance: String, CaseIterable {
+    case system = "System"
+    case light = "Light"
+    case dark = "Dark"
+    
+    var nsAppearance: NSAppearance? {
+        switch self {
+        case .system: return nil
+        case .light: return NSAppearance(named: .aqua)
+        case .dark: return NSAppearance(named: .darkAqua)
+        }
+    }
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindow: OverlayWindow!
     var hostingController: NSHostingController<ContentView>!
@@ -28,6 +42,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }),
             isPasting: Binding(get: { self.isPasting }, set: { self.isPasting = $0 })
         )
+    }
+    
+    var currentAppearance: AppAppearance {
+        get {
+            if let rawValue = UserDefaults.standard.string(forKey: "appAppearance"),
+               let appearance = AppAppearance(rawValue: rawValue) {
+                return appearance
+            }
+            return .system
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: "appAppearance")
+            applyAppearance()
+        }
+    }
+    
+    func applyAppearance() {
+        NSApp.appearance = currentAppearance.nsAppearance
     }
     
     var statusItem: NSStatusItem!
@@ -70,10 +102,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         let menu = NSMenu()
+        
+        // Appearance Menu
+        let appearanceMenu = NSMenu()
+        for appearance in AppAppearance.allCases {
+            let item = NSMenuItem(title: appearance.rawValue, action: #selector(changeAppearance(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = appearance
+            if appearance == currentAppearance {
+                item.state = .on
+            }
+            appearanceMenu.addItem(item)
+        }
+        let appearanceItem = NSMenuItem(title: "Appearance", action: nil, keyEquivalent: "")
+        appearanceItem.submenu = appearanceMenu
+        menu.addItem(appearanceItem)
+        
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Clear History", action: #selector(clearHistory), keyEquivalent: "c"))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit PasteHop", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem.menu = menu
+        
+        // Apply saved appearance
+        applyAppearance()
     }
     
     func checkAccessibilityPermissions() {
@@ -82,6 +134,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         if !accessEnabled {
             print("Accessibility not enabled")
+        }
+    }
+    
+    @objc func changeAppearance(_ sender: NSMenuItem) {
+        if let appearance = sender.representedObject as? AppAppearance {
+            currentAppearance = appearance
+            
+            // Update menu state
+            if let menu = sender.menu {
+                for item in menu.items {
+                    item.state = (item == sender) ? .on : .off
+                }
+            }
         }
     }
     
