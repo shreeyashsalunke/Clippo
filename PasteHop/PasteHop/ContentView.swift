@@ -420,7 +420,7 @@ extension NSColor {
 
 extension Color {
     static let themeTextPrimary = Color(nsColor: .dynamic(light: NSColor(hex: "181d27"), dark: NSColor(hex: "F9FAFB")))
-    static let themeTextSecondary = Color(nsColor: .dynamic(light: NSColor(hex: "717680"), dark: NSColor(hex: "98A2B3")))
+    static let themeTextSecondary = Color(nsColor: .dynamic(light: NSColor(hex: "475467"), dark: NSColor(hex: "98A2B3")))
     static let themeCardBg = Color(nsColor: .dynamic(light: NSColor(hex: "f5f5f5"), dark: NSColor(hex: "161b26")))
     static let themeBorder = Color(nsColor: .dynamic(light: NSColor(hex: "e9eaeb"), dark: NSColor(hex: "344054")))
     static let themeAccent = Color(nsColor: .dynamic(light: NSColor(hex: "7f56d9"), dark: NSColor(hex: "9E77ED")))
