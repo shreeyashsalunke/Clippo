@@ -37,6 +37,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         didSet { updateView() }
     }
     
+    // Onboarding
+    var onboardingWindowController: OnboardingWindowController?
+    
+    var isOnboardingComplete: Bool {
+        UserDefaults.standard.bool(forKey: "onboardingComplete")
+    }
+    
     func updateView() {
         hostingController.rootView = ContentView(
             selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }),
@@ -126,6 +133,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(appearanceItem)
         
         menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Show Onboarding", action: #selector(resetOnboarding), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Clear History", action: #selector(clearHistory), keyEquivalent: "c"))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit PasteHop", action: #selector(quitApp), keyEquivalent: "q"))
@@ -133,6 +141,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Apply saved appearance
         applyAppearance()
+        
+        // Show onboarding if first launch
+        if !isOnboardingComplete {
+            showOnboarding()
+        }
     }
     
     func checkAccessibilityPermissions() {
@@ -142,6 +155,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if !accessEnabled {
             print("Accessibility not enabled")
         }
+    }
+    
+    func showOnboarding() {
+        if onboardingWindowController == nil {
+            onboardingWindowController = OnboardingWindowController()
+        }
+        onboardingWindowController?.showWindow(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     @objc func changeAppearance(_ sender: NSMenuItem) {
@@ -155,6 +176,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+    }
+    
+    @objc func resetOnboarding() {
+        if onboardingWindowController == nil {
+            onboardingWindowController = OnboardingWindowController()
+        }
+        onboardingWindowController?.resetAndShow()
     }
     
     @objc func clearHistory() {

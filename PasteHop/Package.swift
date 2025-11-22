@@ -15,7 +15,10 @@ let package = Package(
                 "ContentView.swift",
                 "ClipboardManager.swift",
                 "HotKeyManager.swift",
-                "OverlayWindow.swift"
+                "OverlayWindow.swift",
+                "OnboardingView.swift",
+                "OnboardingWindowController.swift",
+                "OnboardingState.swift"
             ]
         )
     ]
