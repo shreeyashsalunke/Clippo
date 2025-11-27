@@ -1,2 +1,2 @@
-# PasteHop
+# Clippo
 Project Details
