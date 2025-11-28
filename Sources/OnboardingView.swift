@@ -108,12 +108,23 @@ struct OnboardingView: View {
                 case 5:
                     PermissionStep(
                         onNext: { onboardingState.currentStep = 6 },
+                        onSkip: { onboardingState.currentStep = 7 },
                         onBack: { onboardingState.currentStep = 4 },
                         onClose: onComplete,
                         showDebug: showDebugBorders
                     )
                 case 6:
                     PermissionGrantedStep(
+                        onBack: { onboardingState.currentStep = 5 },
+                        onComplete: {
+                            onboardingState.isComplete = true
+                            onComplete()
+                        },
+                        showDebug: showDebugBorders
+                    )
+                case 7:
+                    PermissionDeniedStep(
+                        onBack: { onboardingState.currentStep = 5 },
                         onComplete: {
                             onboardingState.isComplete = true
                             onComplete()
@@ -817,6 +828,7 @@ struct WalkthroughStep4: View {
 // MARK: - Step 3: Permission Request
 struct PermissionStep: View {
     let onNext: () -> Void
+    let onSkip: () -> Void
     let onBack: () -> Void
     let onClose: () -> Void
     let showDebug: Bool
@@ -872,7 +884,7 @@ struct PermissionStep: View {
                     Spacer()
                     
                     // Skip button positioned above the footer
-                    Button(action: onNext) {
+                    Button(action: onSkip) {
                         Text("Skip")
                             .font(.custom("Inter", size: 16))
                             .fontWeight(.semibold)
@@ -965,55 +977,181 @@ struct PermissionStep: View {
 
 // MARK: - Step 3.1: Permission Granted
 struct PermissionGrantedStep: View {
+    let onBack: () -> Void
     let onComplete: () -> Void
     let showDebug: Bool
     
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            // Success Icon
-            ZStack {
-                Circle()
-                    .fill(Color(hex: "ECFDF3"))
-                    .frame(width: 80, height: 80)
+        ZStack {
+            VStack(spacing: 0) {
+                // Content area
+                VStack(spacing: 0) {
+                    Spacer()
+                        .debugBorder(.orange, isEnabled: showDebug)
+                    
+                    VStack(spacing: 24) {
+                        // Illustration
+                        if let imagePath = Bundle.module.path(forResource: "permission-granted", ofType: "png", inDirectory: "Resources"),
+                           let illustrationImage = NSImage(contentsOfFile: imagePath) {
+                            Image(nsImage: illustrationImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 200)
+                        } else {
+                            // Fallback
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 64))
+                                .foregroundColor(Color(hex: "12B76A"))
+                        }
+                        
+                        // Text Content
+                        Text("You are all set!")
+                            .font(.custom("Inter", size: 20))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(hex: "181D27"))
+                            .debugBorder(.blue, isEnabled: showDebug)
+                    }
+                    .debugBorder(.blue, isEnabled: showDebug)
+                    
+                    Spacer()
+                }
+                .frame(height: 492)
+                .debugBorder(.purple, isEnabled: showDebug)
                 
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 48, weight: .semibold))
-                    .foregroundColor(Color(hex: "12B76A"))
+                // Footer
+                VStack(spacing: 0) {
+                    OnboardingPrimaryButton(
+                        title: "Done",
+                        action: onComplete
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+                    .debugBorder(.green, isEnabled: showDebug)
+                }
+                .debugBorder(.purple, isEnabled: showDebug)
             }
-            .debugBorder(.red, isEnabled: showDebug)
+            .frame(width: 424, height: 552)
             
-            // Text Content
-            VStack(spacing: 8) {
-                Text("You're all set!")
-                    .font(.custom("Inter", size: 20))
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color(hex: "181D27"))
+            // Floating buttons
+            VStack {
+                HStack {
+                    OnboardingIconButton(
+                        icon: "icon-back",
+                        action: onBack
+                    )
+                    .debugBorder(.green, isEnabled: showDebug)
+                    
+                    Spacer()
+                    
+                    OnboardingIconButton(
+                        icon: "icon-close",
+                        action: onComplete
+                    )
+                    .debugBorder(.green, isEnabled: showDebug)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
                 
-                Text("Clippo is ready to help you manage your clipboard. Press ⌘ + ⇧ + V anytime to get started.")
-                    .font(.custom("Inter", size: 14))
-                    .fontWeight(.regular)
-                    .foregroundColor(Color(hex: "535862"))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 32)
+                Spacer()
             }
-            .debugBorder(.blue, isEnabled: showDebug)
-            
-            Spacer()
-            
-            // Done Button
-            OnboardingPrimaryButton(
-                title: "Get Started",
-                action: onComplete
-            )
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
-            .debugBorder(.green, isEnabled: showDebug)
+            .frame(width: 424, height: 552)
+            .debugBorder(.yellow, isEnabled: showDebug)
         }
-        .padding(.top, 80)
-        .debugBorder(.yellow, isEnabled: showDebug)
+    }
+}
+
+// MARK: - Step 3.2: Permission Denied/Skipped
+struct PermissionDeniedStep: View {
+    let onBack: () -> Void
+    let onComplete: () -> Void
+    let showDebug: Bool
+    
+    var body: some View {
+        ZStack {
+            VStack(spacing: 0) {
+                // Content area
+                VStack(spacing: 0) {
+                    Spacer()
+                        .debugBorder(.orange, isEnabled: showDebug)
+                    
+                    VStack(spacing: 24) {
+                        // Illustration
+                        if let imagePath = Bundle.module.path(forResource: "permission-denied", ofType: "png", inDirectory: "Resources"),
+                           let illustrationImage = NSImage(contentsOfFile: imagePath) {
+                            Image(nsImage: illustrationImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 200)
+                        } else {
+                            // Fallback
+                            Image(systemName: "doc.on.clipboard")
+                                .font(.system(size: 64))
+                                .foregroundColor(Color(hex: "7F56D9"))
+                        }
+                        
+                        // Text Content
+                        VStack(spacing: 12) {
+                            Text("Due to no accessibility permission")
+                                .font(.custom("Inter", size: 14))
+                                .fontWeight(.regular)
+                                .foregroundColor(Color(hex: "535862"))
+                            
+                            Text("Release keys will just copy the content\nto your clipboard, to paste press ⌘V")
+                                .font(.custom("Inter", size: 20))
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color(hex: "181D27"))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(.horizontal, 24)
+                        }
+                        .debugBorder(.blue, isEnabled: showDebug)
+                    }
+                    .debugBorder(.blue, isEnabled: showDebug)
+                    
+                    Spacer()
+                }
+                .frame(height: 492)
+                .debugBorder(.purple, isEnabled: showDebug)
+                
+                // Footer
+                VStack(spacing: 0) {
+                    OnboardingPrimaryButton(
+                        title: "Done",
+                        action: onComplete
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+                    .debugBorder(.green, isEnabled: showDebug)
+                }
+                .debugBorder(.purple, isEnabled: showDebug)
+            }
+            .frame(width: 424, height: 552)
+            
+            // Floating buttons
+            VStack {
+                HStack {
+                    OnboardingIconButton(
+                        icon: "icon-back",
+                        action: onBack
+                    )
+                    .debugBorder(.green, isEnabled: showDebug)
+                    
+                    Spacer()
+                    
+                    OnboardingIconButton(
+                        icon: "icon-close",
+                        action: onComplete
+                    )
+                    .debugBorder(.green, isEnabled: showDebug)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
+                
+                Spacer()
+            }
+            .frame(width: 424, height: 552)
+            .debugBorder(.yellow, isEnabled: showDebug)
+        }
     }
 }
 
