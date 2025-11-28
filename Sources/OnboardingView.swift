@@ -7,18 +7,22 @@ struct OnboardingIconButton: View {
     @State private var isHovering = false
     
     var body: some View {
-        Button(action: action) {
+        ZStack {
+            // Background
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isHovering ? Color(hex: "F5F5F5") : Color.clear)
+            
+            // Icon
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundColor(Color(hex: "A4A7AE"))
                 .frame(width: 24, height: 24)
         }
-        .buttonStyle(PlainButtonStyle())
         .frame(width: 44, height: 44)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isHovering ? Color(hex: "F5F5F5") : Color.clear)
-        )
+        .contentShape(Rectangle()) // Make entire area clickable
+        .onTapGesture {
+            action()
+        }
         .onHover { hovering in
             isHovering = hovering
             if hovering {
@@ -841,7 +845,7 @@ struct OnboardingPrimaryButton: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
-                .background(Color(hex: "27727F"))
+                .background(isHovering ? Color(hex: "1F5C66") : Color(hex: "27727F"))
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
