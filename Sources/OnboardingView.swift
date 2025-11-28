@@ -34,10 +34,29 @@ struct OnboardingIconButton: View {
     }
 }
 
+// MARK: - Debug Modifier
+struct DebugBorder: ViewModifier {
+    let color: Color
+    let isEnabled: Bool
+    
+    func body(content: Content) -> some View {
+        content.overlay(
+            isEnabled ? Rectangle().stroke(color, lineWidth: 1) : nil
+        )
+    }
+}
+
+extension View {
+    func debugBorder(_ color: Color = .blue, isEnabled: Bool) -> some View {
+        modifier(DebugBorder(color: color, isEnabled: isEnabled))
+    }
+}
+
 struct OnboardingView: View {
     @ObservedObject var onboardingState: OnboardingState
     let onComplete: () -> Void
     @Environment(\.colorScheme) var colorScheme
+    @State private var showDebugBorders = false
     
     var body: some View {
         ZStack {
@@ -47,54 +66,80 @@ struct OnboardingView: View {
                 case 0:
                     HelloStep(
                         onNext: { onboardingState.currentStep = 1 },
-                        onClose: onComplete
+                        onClose: onComplete,
+                        showDebug: showDebugBorders
                     )
                 case 1:
                     WalkthroughStep1(
                         onNext: { onboardingState.currentStep = 2 },
                         onBack: { onboardingState.currentStep = 0 },
-                        onClose: onComplete
+                        onClose: onComplete,
+                        showDebug: showDebugBorders
                     )
                 case 2:
                     WalkthroughStep2(
                         onNext: { onboardingState.currentStep = 3 },
                         onBack: { onboardingState.currentStep = 1 },
-                        onClose: onComplete
+                        onClose: onComplete,
+                        showDebug: showDebugBorders
                     )
                 case 3:
                     WalkthroughStep3(
                         onNext: { onboardingState.currentStep = 4 },
                         onBack: { onboardingState.currentStep = 2 },
-                        onClose: onComplete
+                        onClose: onComplete,
+                        showDebug: showDebugBorders
                     )
                 case 4:
                     WalkthroughStep4(
                         onNext: { onboardingState.currentStep = 5 },
                         onBack: { onboardingState.currentStep = 3 },
-                        onClose: onComplete
+                        onClose: onComplete,
+                        showDebug: showDebugBorders
                     )
                 case 5:
                     PermissionStep(
                         onNext: { onboardingState.currentStep = 6 },
-                        onBack: { onboardingState.currentStep = 4 }
+                        onBack: { onboardingState.currentStep = 4 },
+                        showDebug: showDebugBorders
                     )
                 case 6:
                     PermissionGrantedStep(
                         onComplete: {
                             onboardingState.isComplete = true
                             onComplete()
-                        }
+                        },
+                        showDebug: showDebugBorders
                     )
                 default:
                     HelloStep(
                         onNext: { onboardingState.currentStep = 1 },
-                        onClose: onComplete
+                        onClose: onComplete,
+                        showDebug: showDebugBorders
                     )
                 }
             }
             .frame(width: 424, height: 552)
             .background(Color(hex: "FFFFFF"))
             .cornerRadius(16)
+            .debugBorder(.green, isEnabled: showDebugBorders)
+            
+            // Debug Toggle
+            VStack {
+                Spacer()
+                HStack {
+                    Toggle("Debug Layout", isOn: $showDebugBorders)
+                        .toggleStyle(SwitchToggleStyle(tint: .red))
+                        .font(.system(size: 10))
+                        .padding(8)
+                        .background(Color.white.opacity(0.9))
+                        .cornerRadius(8)
+                        .shadow(radius: 2)
+                    Spacer()
+                }
+                .padding(.leading, -100) // Move it outside the card to the left
+                .padding(.bottom, 20)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)
@@ -105,6 +150,7 @@ struct OnboardingView: View {
 struct HelloStep: View {
     let onNext: () -> Void
     let onClose: () -> Void
+    let showDebug: Bool
     
     var body: some View {
         ZStack {
@@ -121,6 +167,7 @@ struct HelloStep: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 184, height: 184)
+                            .debugBorder(.red, isEnabled: showDebug)
                     } else {
                         // Fallback to system image
                         ZStack {
@@ -133,11 +180,13 @@ struct HelloStep: View {
                                 .foregroundColor(Color(hex: "7F56D9"))
                         }
                         .frame(width: 184, height: 184)
+                        .debugBorder(.red, isEnabled: showDebug)
                     }
                     
                     // Spacing between illustration and text
                     Spacer()
                         .frame(height: 24)
+                        .debugBorder(.orange, isEnabled: showDebug)
                     
                     // Text Content
                     VStack(spacing: 8) {
@@ -145,6 +194,7 @@ struct HelloStep: View {
                             .font(.custom("Inter", size: 20))
                             .fontWeight(.semibold)
                             .foregroundColor(Color(hex: "181D27"))
+                            .debugBorder(.red, isEnabled: showDebug)
                         
                         VStack(spacing: 0) {
                             Text("I remember what you copy.")
@@ -159,12 +209,15 @@ struct HelloStep: View {
                                 .foregroundColor(Color(hex: "535862"))
                                 .multilineTextAlignment(.center)
                         }
+                        .debugBorder(.blue, isEnabled: showDebug)
                     }
+                    .debugBorder(.blue, isEnabled: showDebug)
                     
                     Spacer()
                 }
                 .frame(height: 492) // Content area height
                 .frame(maxWidth: .infinity)
+                .debugBorder(.purple, isEnabled: showDebug)
                 
                 // Footer with button
                 VStack(spacing: 0) {
@@ -174,7 +227,9 @@ struct HelloStep: View {
                     )
                     .padding(.horizontal, 24)
                     .padding(.bottom, 24)
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
+                .debugBorder(.purple, isEnabled: showDebug)
             }
             .frame(width: 424, height: 552)
             .background(Color(hex: "FFFFFF"))
@@ -189,6 +244,7 @@ struct HelloStep: View {
                         icon: "xmark",
                         action: onClose
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
                 .padding(.top, 24)
                 .padding(.trailing, 24)
@@ -196,6 +252,7 @@ struct HelloStep: View {
                 Spacer()
             }
             .frame(width: 424, height: 552)
+            .debugBorder(.yellow, isEnabled: showDebug)
         }
     }
 }
@@ -205,6 +262,7 @@ struct WalkthroughStep1: View {
     let onNext: () -> Void
     let onBack: () -> Void
     let onClose: () -> Void
+    let showDebug: Bool
     
     var body: some View {
         ZStack {
@@ -213,6 +271,7 @@ struct WalkthroughStep1: View {
                 VStack(spacing: 24) {
                     Spacer()
                         .frame(height: 68) // Space for floating buttons
+                        .debugBorder(.orange, isEnabled: showDebug)
                     
                     VStack(spacing: 12) {
                         // "How it works?" title
@@ -220,6 +279,7 @@ struct WalkthroughStep1: View {
                             .font(.custom("Inter", size: 14))
                             .fontWeight(.regular)
                             .foregroundColor(Color(hex: "535862"))
+                            .debugBorder(.red, isEnabled: showDebug)
                         
                         // Illustration
                         Group {
@@ -250,6 +310,7 @@ struct WalkthroughStep1: View {
                             }
                         }
                         .padding(.horizontal, 24)
+                        .debugBorder(.red, isEnabled: showDebug)
                         
                         // Text Content
                         VStack(spacing: 4) {
@@ -258,7 +319,7 @@ struct WalkthroughStep1: View {
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(hex: "181D27"))
                             
-                            Text("Clippo automatically saves everything you copy to your clipboard history.")
+                            Text("Clippo automatically saves everything\nyou copy to your clipboard history.")
                                 .font(.custom("Inter", size: 14))
                                 .fontWeight(.regular)
                                 .foregroundColor(Color(hex: "535862"))
@@ -266,6 +327,7 @@ struct WalkthroughStep1: View {
                                 .lineSpacing(4)
                                 .padding(.horizontal, 32)
                         }
+                        .debugBorder(.blue, isEnabled: showDebug)
                         
                         // Progress dots
                         HStack(spacing: 8) {
@@ -283,11 +345,14 @@ struct WalkthroughStep1: View {
                                 .frame(width: 8, height: 8)
                         }
                         .padding(.top, 8)
+                        .debugBorder(.blue, isEnabled: showDebug)
                     }
+                    .debugBorder(.blue, isEnabled: showDebug)
                     
                     Spacer()
                 }
                 .frame(height: 492)
+                .debugBorder(.purple, isEnabled: showDebug)
                 
                 // Footer
                 VStack(spacing: 0) {
@@ -297,7 +362,9 @@ struct WalkthroughStep1: View {
                     )
                     .padding(.horizontal, 24)
                     .padding(.bottom, 24)
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
+                .debugBorder(.purple, isEnabled: showDebug)
             }
             .frame(width: 424, height: 552)
             
@@ -308,6 +375,7 @@ struct WalkthroughStep1: View {
                         icon: "arrow.left",
                         action: onBack
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                     
                     Spacer()
                     
@@ -315,6 +383,7 @@ struct WalkthroughStep1: View {
                         icon: "xmark",
                         action: onClose
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
@@ -322,6 +391,7 @@ struct WalkthroughStep1: View {
                 Spacer()
             }
             .frame(width: 424, height: 552)
+            .debugBorder(.yellow, isEnabled: showDebug)
         }
     }
 }
@@ -331,6 +401,7 @@ struct WalkthroughStep2: View {
     let onNext: () -> Void
     let onBack: () -> Void
     let onClose: () -> Void
+    let showDebug: Bool
     
     var body: some View {
         ZStack {
@@ -338,6 +409,7 @@ struct WalkthroughStep2: View {
                 VStack(spacing: 24) {
                     Spacer()
                         .frame(height: 68)
+                        .debugBorder(.orange, isEnabled: showDebug)
                     
                     VStack(spacing: 12) {
                         // "How it works?" title
@@ -345,6 +417,7 @@ struct WalkthroughStep2: View {
                             .font(.custom("Inter", size: 14))
                             .fontWeight(.regular)
                             .foregroundColor(Color(hex: "535862"))
+                            .debugBorder(.red, isEnabled: showDebug)
                         
                         // Illustration placeholder
                         ZStack {
@@ -366,6 +439,7 @@ struct WalkthroughStep2: View {
                             }
                         }
                         .padding(.horizontal, 24)
+                        .debugBorder(.red, isEnabled: showDebug)
                         
                         // Text Content
                         VStack(spacing: 4) {
@@ -382,6 +456,7 @@ struct WalkthroughStep2: View {
                                 .lineSpacing(4)
                                 .padding(.horizontal, 32)
                         }
+                        .debugBorder(.blue, isEnabled: showDebug)
                         
                         // Progress dots
                         HStack(spacing: 8) {
@@ -399,11 +474,14 @@ struct WalkthroughStep2: View {
                                 .frame(width: 8, height: 8)
                         }
                         .padding(.top, 8)
+                        .debugBorder(.blue, isEnabled: showDebug)
                     }
+                    .debugBorder(.blue, isEnabled: showDebug)
                     
                     Spacer()
                 }
                 .frame(height: 492)
+                .debugBorder(.purple, isEnabled: showDebug)
                 
                 // Footer
                 VStack(spacing: 0) {
@@ -413,7 +491,9 @@ struct WalkthroughStep2: View {
                     )
                     .padding(.horizontal, 24)
                     .padding(.bottom, 24)
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
+                .debugBorder(.purple, isEnabled: showDebug)
             }
             .frame(width: 424, height: 552)
             
@@ -424,6 +504,7 @@ struct WalkthroughStep2: View {
                         icon: "arrow.left",
                         action: onBack
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                     
                     Spacer()
                     
@@ -431,6 +512,7 @@ struct WalkthroughStep2: View {
                         icon: "xmark",
                         action: onClose
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
@@ -438,6 +520,7 @@ struct WalkthroughStep2: View {
                 Spacer()
             }
             .frame(width: 424, height: 552)
+            .debugBorder(.yellow, isEnabled: showDebug)
         }
     }
 }
@@ -447,6 +530,7 @@ struct WalkthroughStep3: View {
     let onNext: () -> Void
     let onBack: () -> Void
     let onClose: () -> Void
+    let showDebug: Bool
     
     var body: some View {
         ZStack {
@@ -454,6 +538,7 @@ struct WalkthroughStep3: View {
                 VStack(spacing: 24) {
                     Spacer()
                         .frame(height: 68)
+                        .debugBorder(.orange, isEnabled: showDebug)
                     
                     VStack(spacing: 12) {
                         // "How it works?" title
@@ -461,6 +546,7 @@ struct WalkthroughStep3: View {
                             .font(.custom("Inter", size: 14))
                             .fontWeight(.regular)
                             .foregroundColor(Color(hex: "535862"))
+                            .debugBorder(.red, isEnabled: showDebug)
                         
                         // Illustration placeholder
                         ZStack {
@@ -480,6 +566,7 @@ struct WalkthroughStep3: View {
                             }
                         }
                         .padding(.horizontal, 24)
+                        .debugBorder(.red, isEnabled: showDebug)
                         
                         // Text Content
                         VStack(spacing: 4) {
@@ -496,6 +583,7 @@ struct WalkthroughStep3: View {
                                 .lineSpacing(4)
                                 .padding(.horizontal, 32)
                         }
+                        .debugBorder(.blue, isEnabled: showDebug)
                         
                         // Progress dots
                         HStack(spacing: 8) {
@@ -513,11 +601,14 @@ struct WalkthroughStep3: View {
                                 .frame(width: 8, height: 8)
                         }
                         .padding(.top, 8)
+                        .debugBorder(.blue, isEnabled: showDebug)
                     }
+                    .debugBorder(.blue, isEnabled: showDebug)
                     
                     Spacer()
                 }
                 .frame(height: 492)
+                .debugBorder(.purple, isEnabled: showDebug)
                 
                 // Footer
                 VStack(spacing: 0) {
@@ -527,7 +618,9 @@ struct WalkthroughStep3: View {
                     )
                     .padding(.horizontal, 24)
                     .padding(.bottom, 24)
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
+                .debugBorder(.purple, isEnabled: showDebug)
             }
             .frame(width: 424, height: 552)
             
@@ -538,6 +631,7 @@ struct WalkthroughStep3: View {
                         icon: "arrow.left",
                         action: onBack
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                     
                     Spacer()
                     
@@ -545,6 +639,7 @@ struct WalkthroughStep3: View {
                         icon: "xmark",
                         action: onClose
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
@@ -552,6 +647,7 @@ struct WalkthroughStep3: View {
                 Spacer()
             }
             .frame(width: 424, height: 552)
+            .debugBorder(.yellow, isEnabled: showDebug)
         }
     }
 }
@@ -561,6 +657,7 @@ struct WalkthroughStep4: View {
     let onNext: () -> Void
     let onBack: () -> Void
     let onClose: () -> Void
+    let showDebug: Bool
     
     var body: some View {
         ZStack {
@@ -568,6 +665,7 @@ struct WalkthroughStep4: View {
                 VStack(spacing: 24) {
                     Spacer()
                         .frame(height: 68)
+                        .debugBorder(.orange, isEnabled: showDebug)
                     
                     VStack(spacing: 12) {
                         // "How it works?" title
@@ -575,6 +673,7 @@ struct WalkthroughStep4: View {
                             .font(.custom("Inter", size: 14))
                             .fontWeight(.regular)
                             .foregroundColor(Color(hex: "535862"))
+                            .debugBorder(.red, isEnabled: showDebug)
                         
                         // Illustration placeholder
                         ZStack {
@@ -594,6 +693,7 @@ struct WalkthroughStep4: View {
                             }
                         }
                         .padding(.horizontal, 24)
+                        .debugBorder(.red, isEnabled: showDebug)
                         
                         // Text Content
                         VStack(spacing: 4) {
@@ -610,6 +710,7 @@ struct WalkthroughStep4: View {
                                 .lineSpacing(4)
                                 .padding(.horizontal, 32)
                         }
+                        .debugBorder(.blue, isEnabled: showDebug)
                         
                         // Progress dots
                         HStack(spacing: 8) {
@@ -627,11 +728,14 @@ struct WalkthroughStep4: View {
                                 .frame(width: 8, height: 8)
                         }
                         .padding(.top, 8)
+                        .debugBorder(.blue, isEnabled: showDebug)
                     }
+                    .debugBorder(.blue, isEnabled: showDebug)
                     
                     Spacer()
                 }
                 .frame(height: 492)
+                .debugBorder(.purple, isEnabled: showDebug)
                 
                 // Footer
                 VStack(spacing: 0) {
@@ -641,7 +745,9 @@ struct WalkthroughStep4: View {
                     )
                     .padding(.horizontal, 24)
                     .padding(.bottom, 24)
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
+                .debugBorder(.purple, isEnabled: showDebug)
             }
             .frame(width: 424, height: 552)
             
@@ -652,6 +758,7 @@ struct WalkthroughStep4: View {
                         icon: "arrow.left",
                         action: onBack
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                     
                     Spacer()
                     
@@ -659,6 +766,7 @@ struct WalkthroughStep4: View {
                         icon: "xmark",
                         action: onClose
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
@@ -666,6 +774,7 @@ struct WalkthroughStep4: View {
                 Spacer()
             }
             .frame(width: 424, height: 552)
+            .debugBorder(.yellow, isEnabled: showDebug)
         }
     }
 }
@@ -674,6 +783,7 @@ struct WalkthroughStep4: View {
 struct PermissionStep: View {
     let onNext: () -> Void
     let onBack: () -> Void
+    let showDebug: Bool
     @State private var hasPermission = false
     
     var body: some View {
@@ -690,6 +800,7 @@ struct PermissionStep: View {
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(Color(hex: "7F56D9"))
             }
+            .debugBorder(.red, isEnabled: showDebug)
             
             // Text Content
             VStack(spacing: 8) {
@@ -706,6 +817,7 @@ struct PermissionStep: View {
                     .lineSpacing(4)
                     .padding(.horizontal, 32)
             }
+            .debugBorder(.blue, isEnabled: showDebug)
             
             // Permission Status
             if hasPermission {
@@ -722,6 +834,7 @@ struct PermissionStep: View {
                 .padding(.vertical, 8)
                 .background(Color(hex: "ECFDF3"))
                 .cornerRadius(8)
+                .debugBorder(.green, isEnabled: showDebug)
             }
             
             Spacer()
@@ -733,6 +846,7 @@ struct PermissionStep: View {
                         title: "Continue",
                         action: onNext
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                 } else {
                     OnboardingPrimaryButton(
                         title: "Open System Settings",
@@ -741,6 +855,7 @@ struct PermissionStep: View {
                             checkPermission()
                         }
                     )
+                    .debugBorder(.green, isEnabled: showDebug)
                     
                     Button(action: onNext) {
                         Text("Skip for now")
@@ -756,15 +871,18 @@ struct PermissionStep: View {
                             NSCursor.pop()
                         }
                     }
+                    .debugBorder(.green, isEnabled: showDebug)
                 }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
+            .debugBorder(.purple, isEnabled: showDebug)
         }
         .padding(.top, 80)
         .onAppear {
             checkPermission()
         }
+        .debugBorder(.yellow, isEnabled: showDebug)
     }
     
     func checkPermission() {
@@ -785,6 +903,7 @@ struct PermissionStep: View {
 // MARK: - Step 3.1: Permission Granted
 struct PermissionGrantedStep: View {
     let onComplete: () -> Void
+    let showDebug: Bool
     
     var body: some View {
         VStack(spacing: 24) {
@@ -800,6 +919,7 @@ struct PermissionGrantedStep: View {
                     .font(.system(size: 48, weight: .semibold))
                     .foregroundColor(Color(hex: "12B76A"))
             }
+            .debugBorder(.red, isEnabled: showDebug)
             
             // Text Content
             VStack(spacing: 8) {
@@ -816,6 +936,7 @@ struct PermissionGrantedStep: View {
                     .lineSpacing(4)
                     .padding(.horizontal, 32)
             }
+            .debugBorder(.blue, isEnabled: showDebug)
             
             Spacer()
             
@@ -826,8 +947,10 @@ struct PermissionGrantedStep: View {
             )
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
+            .debugBorder(.green, isEnabled: showDebug)
         }
         .padding(.top, 80)
+        .debugBorder(.yellow, isEnabled: showDebug)
     }
 }
 
