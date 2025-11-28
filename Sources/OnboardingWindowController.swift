@@ -7,7 +7,7 @@ class OnboardingWindowController: NSWindowController {
     
     convenience init() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 524, height: 588),
+            contentRect: NSRect(x: 0, y: 0, width: 524, height: 600),
             styleMask: [.borderless, .miniaturizable],
             backing: .buffered,
             defer: false
