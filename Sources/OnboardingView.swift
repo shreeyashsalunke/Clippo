@@ -1,14 +1,42 @@
 import SwiftUI
 
+// MARK: - Reusable Icon Button Component
+struct OnboardingIconButton: View {
+    let icon: String
+    let action: () -> Void
+    @State private var isHovering = false
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .regular))
+                .foregroundColor(Color(hex: "A4A7AE"))
+                .frame(width: 24, height: 24)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .frame(width: 44, height: 44)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isHovering ? Color(hex: "F5F5F5") : Color.clear)
+        )
+        .onHover { hovering in
+            isHovering = hovering
+            if hovering {
+                NSCursor.pointingHand.push()
+            } else {
+                NSCursor.pop()
+            }
+        }
+    }
+}
+
 struct OnboardingView: View {
     @ObservedObject var onboardingState: OnboardingState
     let onComplete: () -> Void
     @Environment(\.colorScheme) var colorScheme
-    @State private var isHoveringControls = false
     
     var body: some View {
         ZStack {
-            // Card Content
             VStack(spacing: 0) {
                 // Content based on step
                 switch onboardingState.currentStep {
@@ -134,7 +162,7 @@ struct HelloStep: View {
                 .frame(height: 492) // Content area height
                 .frame(maxWidth: .infinity)
                 
-                // Footer with button - 60px height (44px button + 16px bottom padding)
+                // Footer with button
                 VStack(spacing: 0) {
                     OnboardingPrimaryButton(
                         title: "Next",
@@ -153,14 +181,10 @@ struct HelloStep: View {
                 HStack {
                     Spacer()
                     
-                    Button(action: onClose) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(Color(hex: "A4A7AE"))
-                            .frame(width: 24, height: 24)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(8)
+                    OnboardingIconButton(
+                        icon: "xmark",
+                        action: onClose
+                    )
                 }
                 .padding(.top, 24)
                 .padding(.trailing, 24)
@@ -179,114 +203,122 @@ struct WalkthroughStep1: View {
     let onClose: () -> Void
     
     var body: some View {
-        VStack(spacing: 24) {
-            // Top bar with back and close buttons
-            HStack {
-                Button(action: onBack) {
-                    Image(systemName: "arrow.left")
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color(hex: "A4A7AE"))
-                        .frame(width: 24, height: 24)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .padding(8)
-                
-                Spacer()
-                
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color(hex: "A4A7AE"))
-                        .frame(width: 24, height: 24)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .padding(8)
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 12)
-            
-            VStack(spacing: 12) {
-                // "How it works?" title
-                Text("How it works?")
-                    .font(.custom("Inter", size: 14))
-                    .fontWeight(.regular)
-                    .foregroundColor(Color(hex: "535862"))
-                
-                // Illustration
-                Group {
-                    if let imagePath = Bundle.module.path(forResource: "walkthrough-illustration", ofType: "png", inDirectory: "Resources"),
-                       let illustrationImage = NSImage(contentsOfFile: imagePath) {
-                        Image(nsImage: illustrationImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(height: 200)
-                    } else {
-                        // Fallback illustration
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(hex: "F5F5F5"))
-                                .frame(height: 160)
-                            
-                            VStack(spacing: 8) {
-                                Image(systemName: "doc.on.doc")
-                                    .font(.system(size: 48, weight: .light))
-                                    .foregroundColor(Color(hex: "7F56D9"))
-                                
-                                Text("⌘ + C")
-                                    .font(.custom("Inter", size: 18))
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(Color(hex: "181D27"))
+        ZStack {
+            VStack(spacing: 0) {
+                // Content area
+                VStack(spacing: 24) {
+                    Spacer()
+                        .frame(height: 68) // Space for floating buttons
+                    
+                    VStack(spacing: 12) {
+                        // "How it works?" title
+                        Text("How it works?")
+                            .font(.custom("Inter", size: 14))
+                            .fontWeight(.regular)
+                            .foregroundColor(Color(hex: "535862"))
+                        
+                        // Illustration
+                        Group {
+                            if let imagePath = Bundle.module.path(forResource: "walkthrough-illustration", ofType: "png", inDirectory: "Resources"),
+                               let illustrationImage = NSImage(contentsOfFile: imagePath) {
+                                Image(nsImage: illustrationImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(height: 200)
+                            } else {
+                                // Fallback illustration
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(hex: "F5F5F5"))
+                                        .frame(height: 160)
+                                    
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "doc.on.doc")
+                                            .font(.system(size: 48, weight: .light))
+                                            .foregroundColor(Color(hex: "7F56D9"))
+                                        
+                                        Text("⌘ + C")
+                                            .font(.custom("Inter", size: 18))
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(Color(hex: "181D27"))
+                                    }
+                                }
                             }
                         }
+                        .padding(.horizontal, 24)
+                        
+                        // Text Content
+                        VStack(spacing: 4) {
+                            Text("Copy content like usual")
+                                .font(.custom("Inter", size: 18))
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color(hex: "181D27"))
+                            
+                            Text("Clippo automatically saves everything you copy to your clipboard history.")
+                                .font(.custom("Inter", size: 14))
+                                .fontWeight(.regular)
+                                .foregroundColor(Color(hex: "535862"))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(.horizontal, 32)
+                        }
+                        
+                        // Progress dots
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(Color(hex: "27727F"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                        }
+                        .padding(.top, 8)
                     }
+                    
+                    Spacer()
+                }
+                .frame(height: 492)
+                
+                // Footer
+                VStack(spacing: 0) {
+                    OnboardingPrimaryButton(
+                        title: "Next",
+                        action: onNext
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+                }
+            }
+            .frame(width: 424, height: 552)
+            
+            // Floating buttons at top
+            VStack {
+                HStack {
+                    OnboardingIconButton(
+                        icon: "arrow.left",
+                        action: onBack
+                    )
+                    
+                    Spacer()
+                    
+                    OnboardingIconButton(
+                        icon: "xmark",
+                        action: onClose
+                    )
                 }
                 .padding(.horizontal, 24)
+                .padding(.top, 24)
                 
-                // Text Content
-                VStack(spacing: 4) {
-                    Text("Copy content like usual")
-                        .font(.custom("Inter", size: 18))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(hex: "181D27"))
-                    
-                    Text("Clippo automatically saves everything you copy to your clipboard history.")
-                        .font(.custom("Inter", size: 14))
-                        .fontWeight(.regular)
-                        .foregroundColor(Color(hex: "535862"))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(4)
-                        .padding(.horizontal, 32)
-                }
-                
-                // Progress dots
-                HStack(spacing: 8) {
-                    Circle()
-                        .fill(Color(hex: "27727F"))
-                        .frame(width: 8, height: 8)
-                    Circle()
-                        .fill(Color(hex: "D5D7DA"))
-                        .frame(width: 8, height: 8)
-                    Circle()
-                        .fill(Color(hex: "D5D7DA"))
-                        .frame(width: 8, height: 8)
-                    Circle()
-                        .fill(Color(hex: "D5D7DA"))
-                        .frame(width: 8, height: 8)
-                }
-                .padding(.top, 8)
+                Spacer()
             }
-            
-            Spacer()
-            
-            // Navigation Button
-            OnboardingPrimaryButton(
-                title: "Next",
-                action: onNext
-            )
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+            .frame(width: 424, height: 552)
         }
-        .padding(.top, 0)
     }
 }
 
@@ -297,70 +329,112 @@ struct WalkthroughStep2: View {
     let onClose: () -> Void
     
     var body: some View {
-        VStack(spacing: 24) {
-            VStack(spacing: 12) {
-                // Progress indicator
-                Text("2/4")
-                    .font(.custom("Inter", size: 14))
-                    .fontWeight(.regular)
-                    .foregroundColor(Color(hex: "535862").opacity(0.6))
-                
-                // Illustration placeholder
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(hex: "F5F5F5"))
-                        .frame(height: 160)
+        ZStack {
+            VStack(spacing: 0) {
+                VStack(spacing: 24) {
+                    Spacer()
+                        .frame(height: 68)
                     
-                    VStack(spacing: 8) {
-                        Image(systemName: "rectangle.on.rectangle")
-                            .font(.system(size: 48, weight: .light))
-                            .foregroundColor(Color(hex: "7F56D9"))
+                    VStack(spacing: 12) {
+                        // "How it works?" title
+                        Text("How it works?")
+                            .font(.custom("Inter", size: 14))
+                            .fontWeight(.regular)
+                            .foregroundColor(Color(hex: "535862"))
                         
-                        HStack(spacing: 4) {
-                            Text("⌘ + ⇧ + V")
+                        // Illustration placeholder
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(hex: "F5F5F5"))
+                                .frame(height: 160)
+                            
+                            VStack(spacing: 8) {
+                                Image(systemName: "rectangle.on.rectangle")
+                                    .font(.system(size: 48, weight: .light))
+                                    .foregroundColor(Color(hex: "7F56D9"))
+                                
+                                HStack(spacing: 4) {
+                                    Text("⌘ + ⇧ + V")
+                                        .font(.custom("Inter", size: 18))
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(Color(hex: "181D27"))
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        // Text Content
+                        VStack(spacing: 4) {
+                            Text("Open Clippo")
                                 .font(.custom("Inter", size: 18))
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(hex: "181D27"))
+                            
+                            Text("Press ⌘ + ⇧ + V to open your clipboard history window.")
+                                .font(.custom("Inter", size: 14))
+                                .fontWeight(.regular)
+                                .foregroundColor(Color(hex: "535862"))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(.horizontal, 32)
                         }
+                        
+                        // Progress dots
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "27727F"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                        }
+                        .padding(.top, 8)
                     }
+                    
+                    Spacer()
+                }
+                .frame(height: 492)
+                
+                // Footer
+                VStack(spacing: 0) {
+                    OnboardingPrimaryButton(
+                        title: "Next",
+                        action: onNext
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+                }
+            }
+            .frame(width: 424, height: 552)
+            
+            // Floating buttons
+            VStack {
+                HStack {
+                    OnboardingIconButton(
+                        icon: "arrow.left",
+                        action: onBack
+                    )
+                    
+                    Spacer()
+                    
+                    OnboardingIconButton(
+                        icon: "xmark",
+                        action: onClose
+                    )
                 }
                 .padding(.horizontal, 24)
+                .padding(.top, 24)
                 
-                // Text Content
-                VStack(spacing: 4) {
-                    Text("Open Clippo")
-                        .font(.custom("Inter", size: 18))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(hex: "181D27"))
-                    
-                    Text("Press ⌘ + ⇧ + V to open your clipboard history window.")
-                        .font(.custom("Inter", size: 14))
-                        .fontWeight(.regular)
-                        .foregroundColor(Color(hex: "535862"))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(4)
-                        .padding(.horizontal, 32)
-                }
+                Spacer()
             }
-            
-            Spacer()
-            
-            // Navigation Buttons
-            HStack(spacing: 12) {
-                OnboardingSecondaryButton(
-                    title: "Back",
-                    action: onBack
-                )
-                
-                OnboardingPrimaryButton(
-                    title: "Next",
-                    action: onNext
-                )
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+            .frame(width: 424, height: 552)
         }
-        .padding(.top, 0)
     }
 }
 
@@ -371,68 +445,110 @@ struct WalkthroughStep3: View {
     let onClose: () -> Void
     
     var body: some View {
-        VStack(spacing: 24) {
-            VStack(spacing: 12) {
-                // Progress indicator
-                Text("3/4")
-                    .font(.custom("Inter", size: 14))
-                    .fontWeight(.regular)
-                    .foregroundColor(Color(hex: "535862").opacity(0.6))
-                
-                // Illustration placeholder
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(hex: "F5F5F5"))
-                        .frame(height: 160)
+        ZStack {
+            VStack(spacing: 0) {
+                VStack(spacing: 24) {
+                    Spacer()
+                        .frame(height: 68)
                     
-                    VStack(spacing: 8) {
-                        Image(systemName: "arrow.up.arrow.down")
-                            .font(.system(size: 48, weight: .light))
-                            .foregroundColor(Color(hex: "7F56D9"))
+                    VStack(spacing: 12) {
+                        // "How it works?" title
+                        Text("How it works?")
+                            .font(.custom("Inter", size: 14))
+                            .fontWeight(.regular)
+                            .foregroundColor(Color(hex: "535862"))
                         
-                        Text("Keep holding ⌘ + ⇧")
-                            .font(.custom("Inter", size: 16))
-                            .fontWeight(.medium)
-                            .foregroundColor(Color(hex: "181D27"))
+                        // Illustration placeholder
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(hex: "F5F5F5"))
+                                .frame(height: 160)
+                            
+                            VStack(spacing: 8) {
+                                Image(systemName: "arrow.up.arrow.down")
+                                    .font(.system(size: 48, weight: .light))
+                                    .foregroundColor(Color(hex: "7F56D9"))
+                                
+                                Text("Keep holding ⌘ + ⇧")
+                                    .font(.custom("Inter", size: 16))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(Color(hex: "181D27"))
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        // Text Content
+                        VStack(spacing: 4) {
+                            Text("Navigate items")
+                                .font(.custom("Inter", size: 18))
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color(hex: "181D27"))
+                            
+                            Text("Keep holding ⌘ + ⇧ and press V repeatedly to cycle through your clipboard items.")
+                                .font(.custom("Inter", size: 14))
+                                .fontWeight(.regular)
+                                .foregroundColor(Color(hex: "535862"))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(.horizontal, 32)
+                        }
+                        
+                        // Progress dots
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "27727F"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                        }
+                        .padding(.top, 8)
                     }
+                    
+                    Spacer()
+                }
+                .frame(height: 492)
+                
+                // Footer
+                VStack(spacing: 0) {
+                    OnboardingPrimaryButton(
+                        title: "Next",
+                        action: onNext
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+                }
+            }
+            .frame(width: 424, height: 552)
+            
+            // Floating buttons
+            VStack {
+                HStack {
+                    OnboardingIconButton(
+                        icon: "arrow.left",
+                        action: onBack
+                    )
+                    
+                    Spacer()
+                    
+                    OnboardingIconButton(
+                        icon: "xmark",
+                        action: onClose
+                    )
                 }
                 .padding(.horizontal, 24)
+                .padding(.top, 24)
                 
-                // Text Content
-                VStack(spacing: 4) {
-                    Text("Navigate items")
-                        .font(.custom("Inter", size: 18))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(hex: "181D27"))
-                    
-                    Text("Keep holding ⌘ + ⇧ and press V repeatedly to cycle through your clipboard items.")
-                        .font(.custom("Inter", size: 14))
-                        .fontWeight(.regular)
-                        .foregroundColor(Color(hex: "535862"))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(4)
-                        .padding(.horizontal, 32)
-                }
+                Spacer()
             }
-            
-            Spacer()
-            
-            // Navigation Buttons
-            HStack(spacing: 12) {
-                OnboardingSecondaryButton(
-                    title: "Back",
-                    action: onBack
-                )
-                
-                OnboardingPrimaryButton(
-                    title: "Next",
-                    action: onNext
-                )
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+            .frame(width: 424, height: 552)
         }
-        .padding(.top, 0)
     }
 }
 
@@ -443,68 +559,110 @@ struct WalkthroughStep4: View {
     let onClose: () -> Void
     
     var body: some View {
-        VStack(spacing: 24) {
-            VStack(spacing: 12) {
-                // Progress indicator
-                Text("4/4")
-                    .font(.custom("Inter", size: 14))
-                    .fontWeight(.regular)
-                    .foregroundColor(Color(hex: "535862").opacity(0.6))
-                
-                // Illustration placeholder
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(hex: "F5F5F5"))
-                        .frame(height: 160)
+        ZStack {
+            VStack(spacing: 0) {
+                VStack(spacing: 24) {
+                    Spacer()
+                        .frame(height: 68)
                     
-                    VStack(spacing: 8) {
-                        Image(systemName: "doc.on.clipboard")
-                            .font(.system(size: 48, weight: .light))
-                            .foregroundColor(Color(hex: "7F56D9"))
+                    VStack(spacing: 12) {
+                        // "How it works?" title
+                        Text("How it works?")
+                            .font(.custom("Inter", size: 14))
+                            .fontWeight(.regular)
+                            .foregroundColor(Color(hex: "535862"))
                         
-                        Text("Release keys")
-                            .font(.custom("Inter", size: 16))
-                            .fontWeight(.medium)
-                            .foregroundColor(Color(hex: "181D27"))
+                        // Illustration placeholder
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(hex: "F5F5F5"))
+                                .frame(height: 160)
+                            
+                            VStack(spacing: 8) {
+                                Image(systemName: "doc.on.clipboard")
+                                    .font(.system(size: 48, weight: .light))
+                                    .foregroundColor(Color(hex: "7F56D9"))
+                                
+                                Text("Release keys")
+                                    .font(.custom("Inter", size: 16))
+                                    .fontWeight(.medium)
+                                    .foregroundColor(Color(hex: "181D27"))
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        // Text Content
+                        VStack(spacing: 4) {
+                            Text("Paste selected item")
+                                .font(.custom("Inter", size: 18))
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color(hex: "181D27"))
+                            
+                            Text("Release the keys to automatically paste the selected clipboard item.")
+                                .font(.custom("Inter", size: 14))
+                                .fontWeight(.regular)
+                                .foregroundColor(Color(hex: "535862"))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(.horizontal, 32)
+                        }
+                        
+                        // Progress dots
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "D5D7DA"))
+                                .frame(width: 8, height: 8)
+                            Circle()
+                                .fill(Color(hex: "27727F"))
+                                .frame(width: 8, height: 8)
+                        }
+                        .padding(.top, 8)
                     }
+                    
+                    Spacer()
+                }
+                .frame(height: 492)
+                
+                // Footer
+                VStack(spacing: 0) {
+                    OnboardingPrimaryButton(
+                        title: "Next",
+                        action: onNext
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+                }
+            }
+            .frame(width: 424, height: 552)
+            
+            // Floating buttons
+            VStack {
+                HStack {
+                    OnboardingIconButton(
+                        icon: "arrow.left",
+                        action: onBack
+                    )
+                    
+                    Spacer()
+                    
+                    OnboardingIconButton(
+                        icon: "xmark",
+                        action: onClose
+                    )
                 }
                 .padding(.horizontal, 24)
+                .padding(.top, 24)
                 
-                // Text Content
-                VStack(spacing: 4) {
-                    Text("Paste selected item")
-                        .font(.custom("Inter", size: 18))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(hex: "181D27"))
-                    
-                    Text("Release the keys to automatically paste the selected clipboard item.")
-                        .font(.custom("Inter", size: 14))
-                        .fontWeight(.regular)
-                        .foregroundColor(Color(hex: "535862"))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(4)
-                        .padding(.horizontal, 32)
-                }
+                Spacer()
             }
-            
-            Spacer()
-            
-            // Navigation Buttons
-            HStack(spacing: 12) {
-                OnboardingSecondaryButton(
-                    title: "Back",
-                    action: onBack
-                )
-                
-                OnboardingPrimaryButton(
-                    title: "Next",
-                    action: onNext
-                )
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
+            .frame(width: 424, height: 552)
         }
-        .padding(.top, 0)
     }
 }
 
@@ -587,6 +745,13 @@ struct PermissionStep: View {
                             .foregroundColor(Color(hex: "535862"))
                     }
                     .buttonStyle(PlainButtonStyle())
+                    .onHover { hovering in
+                        if hovering {
+                            NSCursor.pointingHand.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
                 }
             }
             .padding(.horizontal, 24)
@@ -666,6 +831,7 @@ struct PermissionGrantedStep: View {
 struct OnboardingPrimaryButton: View {
     let title: String
     let action: () -> Void
+    @State private var isHovering = false
     
     var body: some View {
         Button(action: action) {
@@ -705,12 +871,21 @@ struct OnboardingPrimaryButton: View {
                 )
         }
         .buttonStyle(PlainButtonStyle())
+        .onHover { hovering in
+            isHovering = hovering
+            if hovering {
+                NSCursor.pointingHand.push()
+            } else {
+                NSCursor.pop()
+            }
+        }
     }
 }
 
 struct OnboardingSecondaryButton: View {
     let title: String
     let action: () -> Void
+    @State private var isHovering = false
     
     var body: some View {
         Button(action: action) {
@@ -728,5 +903,15 @@ struct OnboardingSecondaryButton: View {
                 )
         }
         .buttonStyle(PlainButtonStyle())
+        .onHover { hovering in
+            isHovering = hovering
+            if hovering {
+                NSCursor.pointingHand.push()
+            } else {
+                NSCursor.pop()
+            }
+        }
     }
 }
+
+
