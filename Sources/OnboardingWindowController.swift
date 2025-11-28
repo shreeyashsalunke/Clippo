@@ -7,8 +7,8 @@ class OnboardingWindowController: NSWindowController {
     
     convenience init() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 512, height: 516),
-            styleMask: [.titled, .closable],
+            contentRect: NSRect(x: 0, y: 0, width: 524, height: 588),
+            styleMask: [.borderless, .miniaturizable],
             backing: .buffered,
             defer: false
         )
@@ -17,6 +17,8 @@ class OnboardingWindowController: NSWindowController {
         window.titleVisibility = .hidden
         window.isMovableByWindowBackground = true
         window.backgroundColor = .clear
+        window.isOpaque = false
+        window.hasShadow = true
         window.level = .floating
         window.center()
         

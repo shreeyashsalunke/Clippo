@@ -4,11 +4,11 @@ struct OnboardingView: View {
     @ObservedObject var onboardingState: OnboardingState
     let onComplete: () -> Void
     @Environment(\.colorScheme) var colorScheme
+    @State private var isHoveringControls = false
     
     var body: some View {
         ZStack {
-            Color.clear.background(.ultraThinMaterial)
-            
+            // Card Content
             VStack(spacing: 0) {
                 // Content based on step
                 switch onboardingState.currentStep {
@@ -63,10 +63,43 @@ struct OnboardingView: View {
             .frame(width: 424, height: 488)
             .background(Color(hex: "FFFFFF"))
             .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.08), radius: 24, x: 0, y: 20)
-            .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 8)
-            .shadow(color: Color.black.opacity(0.04), radius: 3, x: 0, y: 3)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.gray.opacity(0.08), lineWidth: 0.25)
+            )
+            .overlay(
+                HStack(spacing: 8) {
+                    // Close Button
+                    ZStack {
+                        Circle()
+                            .fill(Color(hex: "FF5F57"))
+                            .frame(width: 12, height: 12)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color(hex: "E0443E"), lineWidth: 0.5)
+                            )
+                        
+                        if isHoveringControls {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 7, weight: .bold))
+                                .foregroundColor(Color(hex: "4C0000").opacity(0.5))
+                        }
+                    }
+                    .frame(width: 12, height: 12)
+                    .onTapGesture {
+                        onComplete()
+                    }
+                }
+                .padding(.leading, 20)
+                .padding(.top, 20)
+                .onHover { hovering in
+                    isHoveringControls = hovering
+                },
+                alignment: .topLeading
+            )
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
@@ -146,21 +179,6 @@ struct WalkthroughStep1: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            // Close Button
-            HStack {
-                Spacer()
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color(hex: "A4A7AE"))
-                        .frame(width: 24, height: 24)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .padding(8)
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 12)
-            
             VStack(spacing: 12) {
                 // Progress indicator
                 Text("1/4")
@@ -233,21 +251,6 @@ struct WalkthroughStep2: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            // Close Button
-            HStack {
-                Spacer()
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color(hex: "A4A7AE"))
-                        .frame(width: 24, height: 24)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .padding(8)
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 12)
-            
             VStack(spacing: 12) {
                 // Progress indicator
                 Text("2/4")
@@ -322,21 +325,6 @@ struct WalkthroughStep3: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            // Close Button
-            HStack {
-                Spacer()
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color(hex: "A4A7AE"))
-                        .frame(width: 24, height: 24)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .padding(8)
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 12)
-            
             VStack(spacing: 12) {
                 // Progress indicator
                 Text("3/4")
@@ -409,21 +397,6 @@ struct WalkthroughStep4: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            // Close Button
-            HStack {
-                Spacer()
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color(hex: "A4A7AE"))
-                        .frame(width: 24, height: 24)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .padding(8)
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 12)
-            
             VStack(spacing: 12) {
                 // Progress indicator
                 Text("4/4")
