@@ -19,6 +19,9 @@ let package = Package(
                 "OnboardingView.swift",
                 "OnboardingWindowController.swift",
                 "OnboardingState.swift"
+            ],
+            resources: [
+                .copy("../Design")
             ]
         )
     ]

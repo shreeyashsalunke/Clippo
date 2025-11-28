@@ -11,19 +11,57 @@ struct OnboardingView: View {
             
             VStack(spacing: 0) {
                 // Content based on step
-                if onboardingState.currentStep == 0 {
-                    WelcomeStep(onNext: { onboardingState.currentStep = 1 })
-                } else if onboardingState.currentStep == 1 {
-                    AccessibilityStep(onNext: { onboardingState.currentStep = 2 })
-                } else {
-                    HowToUseStep(onComplete: {
-                        onboardingState.isComplete = true
-                        onComplete()
-                    })
+                switch onboardingState.currentStep {
+                case 0:
+                    HelloStep(
+                        onNext: { onboardingState.currentStep = 1 },
+                        onClose: onComplete
+                    )
+                case 1:
+                    WalkthroughStep1(
+                        onNext: { onboardingState.currentStep = 2 },
+                        onBack: { onboardingState.currentStep = 0 },
+                        onClose: onComplete
+                    )
+                case 2:
+                    WalkthroughStep2(
+                        onNext: { onboardingState.currentStep = 3 },
+                        onBack: { onboardingState.currentStep = 1 },
+                        onClose: onComplete
+                    )
+                case 3:
+                    WalkthroughStep3(
+                        onNext: { onboardingState.currentStep = 4 },
+                        onBack: { onboardingState.currentStep = 2 },
+                        onClose: onComplete
+                    )
+                case 4:
+                    WalkthroughStep4(
+                        onNext: { onboardingState.currentStep = 5 },
+                        onBack: { onboardingState.currentStep = 3 },
+                        onClose: onComplete
+                    )
+                case 5:
+                    PermissionStep(
+                        onNext: { onboardingState.currentStep = 6 },
+                        onBack: { onboardingState.currentStep = 4 }
+                    )
+                case 6:
+                    PermissionGrantedStep(
+                        onComplete: {
+                            onboardingState.isComplete = true
+                            onComplete()
+                        }
+                    )
+                default:
+                    HelloStep(
+                        onNext: { onboardingState.currentStep = 1 },
+                        onClose: onComplete
+                    )
                 }
             }
-            .frame(width: 512, height: 516)
-            .background(Color.themeCardBg(for: colorScheme))
+            .frame(width: 424, height: 488)
+            .background(Color(hex: "FFFFFF"))
             .cornerRadius(16)
             .shadow(color: Color.black.opacity(0.08), radius: 24, x: 0, y: 20)
             .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 8)
@@ -32,148 +70,507 @@ struct OnboardingView: View {
     }
 }
 
-// MARK: - Step 1: Welcome
-struct WelcomeStep: View {
+// MARK: - Step 1: Hello
+struct HelloStep: View {
     let onNext: () -> Void
-    @Environment(\.colorScheme) var colorScheme
+    let onClose: () -> Void
     
     var body: some View {
         VStack(spacing: 12) {
             Spacer()
             
-            // App Icon
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color(hex: "7F56D9"), Color(hex: "9E77ED")],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(width: 48, height: 48)
-                
-                Image(systemName: "clipboard.fill")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(.white)
+            // Clippo Illustration
+            if let resourcePath = Bundle.main.resourcePath,
+               let clippoImage = NSImage(contentsOfFile: resourcePath + "/Design/Assets/clippo-waving-hello.png") {
+                Image(nsImage: clippoImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 184, height: 184)
+            } else {
+                // Fallback to system image
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "F9F5FF"))
+                        .frame(width: 184, height: 184)
+                    
+                    Image(systemName: "hand.wave.fill")
+                        .font(.system(size: 80, weight: .semibold))
+                        .foregroundColor(Color(hex: "7F56D9"))
+                }
             }
-            .padding(.bottom, 12)
             
-            // Title
-            Text("Welcome to Clippo")
-                .font(.custom("Inter", size: 20))
-                .fontWeight(.semibold)
-                .foregroundColor(Color.themeTextPrimary(for: colorScheme))
-            
-            // Description
-            Text("Your clipboard manager that makes copy-paste a breeze. Access your clipboard history with a simple keyboard shortcut.")
-                .font(.custom("Inter", size: 14))
-                .fontWeight(.regular)
-                .foregroundColor(Color.themeTextSecondary(for: colorScheme))
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
+            // Text Content
+            VStack(spacing: 2) {
+                Text("Hi, I'm Clippo!")
+                    .font(.custom("Inter", size: 20))
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color(hex: "181D27"))
+                
+                VStack(spacing: 4) {
+                    Text("I remember what you copy.")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                        .multilineTextAlignment(.center)
+                    
+                    Text("Let me give you a 20-second tour.")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                        .multilineTextAlignment(.center)
+                }
                 .padding(.horizontal, 48)
+                .padding(.top, 8)
+            }
+            .frame(height: 112)
             
             Spacer()
             
-            // Get Started Button
-            OnboardingButton(
-                title: "Get Started",
-                isPrimary: true,
+            // Next Button
+            OnboardingPrimaryButton(
+                title: "Next",
                 action: onNext
             )
             .padding(.horizontal, 24)
-            .padding(.bottom, 64)
+            .padding(.bottom, 24)
         }
         .padding(.top, 80)
     }
 }
 
-// MARK: - Step 2: Accessibility Permission
-struct AccessibilityStep: View {
+// MARK: - Step 2.1: Walkthrough - Copy Text
+struct WalkthroughStep1: View {
     let onNext: () -> Void
-    @Environment(\.colorScheme) var colorScheme
+    let onBack: () -> Void
+    let onClose: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            // Close Button
+            HStack {
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(hex: "A4A7AE"))
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(8)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+            
+            VStack(spacing: 12) {
+                // Progress indicator
+                Text("1/4")
+                    .font(.custom("Inter", size: 14))
+                    .fontWeight(.regular)
+                    .foregroundColor(Color(hex: "535862").opacity(0.6))
+                
+                // Illustration placeholder
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(hex: "F5F5F5"))
+                        .frame(height: 160)
+                    
+                    VStack(spacing: 8) {
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 48, weight: .light))
+                            .foregroundColor(Color(hex: "7F56D9"))
+                        
+                        Text("⌘ + C")
+                            .font(.custom("Inter", size: 18))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(hex: "181D27"))
+                    }
+                }
+                .padding(.horizontal, 24)
+                
+                // Text Content
+                VStack(spacing: 4) {
+                    Text("Copy text as usual")
+                        .font(.custom("Inter", size: 18))
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color(hex: "181D27"))
+                    
+                    Text("Clippo automatically saves everything you copy to your clipboard history.")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 32)
+                }
+            }
+            
+            Spacer()
+            
+            // Navigation Buttons
+            HStack(spacing: 12) {
+                OnboardingSecondaryButton(
+                    title: "Back",
+                    action: onBack
+                )
+                
+                OnboardingPrimaryButton(
+                    title: "Next",
+                    action: onNext
+                )
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .padding(.top, 0)
+    }
+}
+
+// MARK: - Step 2.2: Walkthrough - Open Clippo
+struct WalkthroughStep2: View {
+    let onNext: () -> Void
+    let onBack: () -> Void
+    let onClose: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            // Close Button
+            HStack {
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(hex: "A4A7AE"))
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(8)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+            
+            VStack(spacing: 12) {
+                // Progress indicator
+                Text("2/4")
+                    .font(.custom("Inter", size: 14))
+                    .fontWeight(.regular)
+                    .foregroundColor(Color(hex: "535862").opacity(0.6))
+                
+                // Illustration placeholder
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(hex: "F5F5F5"))
+                        .frame(height: 160)
+                    
+                    VStack(spacing: 8) {
+                        Image(systemName: "rectangle.on.rectangle")
+                            .font(.system(size: 48, weight: .light))
+                            .foregroundColor(Color(hex: "7F56D9"))
+                        
+                        HStack(spacing: 4) {
+                            Text("⌘ + ⇧ + V")
+                                .font(.custom("Inter", size: 18))
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color(hex: "181D27"))
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+                
+                // Text Content
+                VStack(spacing: 4) {
+                    Text("Open Clippo")
+                        .font(.custom("Inter", size: 18))
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color(hex: "181D27"))
+                    
+                    Text("Press ⌘ + ⇧ + V to open your clipboard history window.")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 32)
+                }
+            }
+            
+            Spacer()
+            
+            // Navigation Buttons
+            HStack(spacing: 12) {
+                OnboardingSecondaryButton(
+                    title: "Back",
+                    action: onBack
+                )
+                
+                OnboardingPrimaryButton(
+                    title: "Next",
+                    action: onNext
+                )
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .padding(.top, 0)
+    }
+}
+
+// MARK: - Step 2.3: Walkthrough - Navigate
+struct WalkthroughStep3: View {
+    let onNext: () -> Void
+    let onBack: () -> Void
+    let onClose: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            // Close Button
+            HStack {
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(hex: "A4A7AE"))
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(8)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+            
+            VStack(spacing: 12) {
+                // Progress indicator
+                Text("3/4")
+                    .font(.custom("Inter", size: 14))
+                    .fontWeight(.regular)
+                    .foregroundColor(Color(hex: "535862").opacity(0.6))
+                
+                // Illustration placeholder
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(hex: "F5F5F5"))
+                        .frame(height: 160)
+                    
+                    VStack(spacing: 8) {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .font(.system(size: 48, weight: .light))
+                            .foregroundColor(Color(hex: "7F56D9"))
+                        
+                        Text("Keep holding ⌘ + ⇧")
+                            .font(.custom("Inter", size: 16))
+                            .fontWeight(.medium)
+                            .foregroundColor(Color(hex: "181D27"))
+                    }
+                }
+                .padding(.horizontal, 24)
+                
+                // Text Content
+                VStack(spacing: 4) {
+                    Text("Navigate items")
+                        .font(.custom("Inter", size: 18))
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color(hex: "181D27"))
+                    
+                    Text("Keep holding ⌘ + ⇧ and press V repeatedly to cycle through your clipboard items.")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 32)
+                }
+            }
+            
+            Spacer()
+            
+            // Navigation Buttons
+            HStack(spacing: 12) {
+                OnboardingSecondaryButton(
+                    title: "Back",
+                    action: onBack
+                )
+                
+                OnboardingPrimaryButton(
+                    title: "Next",
+                    action: onNext
+                )
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .padding(.top, 0)
+    }
+}
+
+// MARK: - Step 2.4: Walkthrough - Paste
+struct WalkthroughStep4: View {
+    let onNext: () -> Void
+    let onBack: () -> Void
+    let onClose: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            // Close Button
+            HStack {
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(hex: "A4A7AE"))
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(8)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+            
+            VStack(spacing: 12) {
+                // Progress indicator
+                Text("4/4")
+                    .font(.custom("Inter", size: 14))
+                    .fontWeight(.regular)
+                    .foregroundColor(Color(hex: "535862").opacity(0.6))
+                
+                // Illustration placeholder
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(hex: "F5F5F5"))
+                        .frame(height: 160)
+                    
+                    VStack(spacing: 8) {
+                        Image(systemName: "doc.on.clipboard")
+                            .font(.system(size: 48, weight: .light))
+                            .foregroundColor(Color(hex: "7F56D9"))
+                        
+                        Text("Release keys")
+                            .font(.custom("Inter", size: 16))
+                            .fontWeight(.medium)
+                            .foregroundColor(Color(hex: "181D27"))
+                    }
+                }
+                .padding(.horizontal, 24)
+                
+                // Text Content
+                VStack(spacing: 4) {
+                    Text("Paste selected item")
+                        .font(.custom("Inter", size: 18))
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color(hex: "181D27"))
+                    
+                    Text("Release the keys to automatically paste the selected clipboard item.")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 32)
+                }
+            }
+            
+            Spacer()
+            
+            // Navigation Buttons
+            HStack(spacing: 12) {
+                OnboardingSecondaryButton(
+                    title: "Back",
+                    action: onBack
+                )
+                
+                OnboardingPrimaryButton(
+                    title: "Next",
+                    action: onNext
+                )
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .padding(.top, 0)
+    }
+}
+
+// MARK: - Step 3: Permission Request
+struct PermissionStep: View {
+    let onNext: () -> Void
+    let onBack: () -> Void
     @State private var hasPermission = false
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 24) {
             Spacer()
             
-            // Accessibility Icon
+            // Icon
             ZStack {
                 Circle()
                     .fill(Color(hex: "F4EBFF"))
-                    .frame(width: 48, height: 48)
+                    .frame(width: 56, height: 56)
                 
-                Image(systemName: "accessibility")
-                    .font(.system(size: 24, weight: .semibold))
+                Image(systemName: "lock.shield")
+                    .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(Color(hex: "7F56D9"))
             }
-            .padding(.bottom, 12)
             
-            // Title
-            Text("Enable Accessibility")
-                .font(.custom("Inter", size: 20))
-                .fontWeight(.semibold)
-                .foregroundColor(Color.themeTextPrimary(for: colorScheme))
-            
-            // Description
-            Text("Clippo needs accessibility permissions to paste clipboard items automatically. This allows the app to simulate keyboard shortcuts on your behalf.")
-                .font(.custom("Inter", size: 14))
-                .fontWeight(.regular)
-                .foregroundColor(Color.themeTextSecondary(for: colorScheme))
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
-                .padding(.horizontal, 48)
+            // Text Content
+            VStack(spacing: 8) {
+                Text("Enable Accessibility")
+                    .font(.custom("Inter", size: 20))
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color(hex: "181D27"))
+                
+                Text("Clippo needs accessibility permission to paste items automatically. This allows the app to simulate keyboard shortcuts.")
+                    .font(.custom("Inter", size: 14))
+                    .fontWeight(.regular)
+                    .foregroundColor(Color(hex: "535862"))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 32)
+            }
             
             // Permission Status
-            HStack(spacing: 8) {
-                Image(systemName: hasPermission ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                    .foregroundColor(hasPermission ? .green : Color(hex: "F79009"))
-                
-                Text(hasPermission ? "Permission Granted" : "Permission Required")
-                    .font(.custom("Inter", size: 12))
-                    .fontWeight(.medium)
-                    .foregroundColor(Color.themeTextSecondary(for: colorScheme))
+            if hasPermission {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(Color(hex: "12B76A"))
+                    
+                    Text("Permission granted")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.medium)
+                        .foregroundColor(Color(hex: "027A48"))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color(hex: "ECFDF3"))
+                .cornerRadius(8)
             }
-            .padding(.top, 8)
             
             Spacer()
             
             // Buttons
             VStack(spacing: 12) {
-                OnboardingButton(
-                    title: "Open System Settings",
-                    isPrimary: !hasPermission,
-                    action: {
-                        openAccessibilitySettings()
-                        checkPermission()
-                    }
-                )
-                
                 if hasPermission {
-                    OnboardingButton(
+                    OnboardingPrimaryButton(
                         title: "Continue",
-                        isPrimary: true,
                         action: onNext
                     )
                 } else {
-                    Button(action: {
-                        checkPermission()
-                        if hasPermission {
-                            onNext()
+                    OnboardingPrimaryButton(
+                        title: "Open System Settings",
+                        action: {
+                            openAccessibilitySettings()
+                            checkPermission()
                         }
-                    }) {
-                        Text("Skip for Now")
+                    )
+                    
+                    Button(action: onNext) {
+                        Text("Skip for now")
                             .font(.custom("Inter", size: 14))
                             .fontWeight(.semibold)
-                            .foregroundColor(Color.themeTextSecondary(for: colorScheme))
+                            .foregroundColor(Color(hex: "535862"))
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
             }
             .padding(.horizontal, 24)
-            .padding(.bottom, 64)
+            .padding(.bottom, 24)
         }
         .padding(.top, 80)
         .onAppear {
@@ -196,150 +593,120 @@ struct AccessibilityStep: View {
     }
 }
 
-// MARK: - Step 3: How to Use
-struct HowToUseStep: View {
+// MARK: - Step 3.1: Permission Granted
+struct PermissionGrantedStep: View {
     let onComplete: () -> Void
-    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 24) {
             Spacer()
             
-            // Icon
+            // Success Icon
             ZStack {
                 Circle()
-                    .fill(Color(hex: "EFF8FF"))
-                    .frame(width: 48, height: 48)
+                    .fill(Color(hex: "ECFDF3"))
+                    .frame(width: 80, height: 80)
                 
-                Image(systemName: "lightbulb.fill")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(Color(hex: "0BA5EC"))
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 48, weight: .semibold))
+                    .foregroundColor(Color(hex: "12B76A"))
             }
-            .padding(.bottom, 12)
             
-            // Title
-            Text("How to Use Clippo")
-                .font(.custom("Inter", size: 20))
-                .fontWeight(.semibold)
-                .foregroundColor(Color.themeTextPrimary(for: colorScheme))
-            
-            // Instructions
-            VStack(alignment: .leading, spacing: 16) {
-                InstructionRow(
-                    number: "1",
-                    title: "Open Clippo",
-                    description: "Press ⌘ + ⇧ + V to open your clipboard history"
-                )
+            // Text Content
+            VStack(spacing: 8) {
+                Text("You're all set!")
+                    .font(.custom("Inter", size: 20))
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color(hex: "181D27"))
                 
-                InstructionRow(
-                    number: "2",
-                    title: "Navigate Items",
-                    description: "Keep holding ⌘ + ⇧ and press V to cycle through items"
-                )
-                
-                InstructionRow(
-                    number: "3",
-                    title: "Paste",
-                    description: "Release the keys to paste the selected item"
-                )
+                Text("Clippo is ready to help you manage your clipboard. Press ⌘ + ⇧ + V anytime to get started.")
+                    .font(.custom("Inter", size: 14))
+                    .fontWeight(.regular)
+                    .foregroundColor(Color(hex: "535862"))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 32)
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 8)
             
             Spacer()
             
             // Done Button
-            OnboardingButton(
-                title: "Done",
-                isPrimary: true,
+            OnboardingPrimaryButton(
+                title: "Get Started",
                 action: onComplete
             )
             .padding(.horizontal, 24)
-            .padding(.bottom, 64)
+            .padding(.bottom, 24)
         }
         .padding(.top, 80)
     }
 }
 
-// MARK: - Supporting Views
-struct InstructionRow: View {
-    let number: String
+// MARK: - Button Components
+struct OnboardingPrimaryButton: View {
     let title: String
-    let description: String
-    @Environment(\.colorScheme) var colorScheme
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Number Badge
-            ZStack {
-                Circle()
-                    .fill(Color(hex: "F9F5FF"))
-                    .frame(width: 32, height: 32)
-                
-                Text(number)
-                    .font(.custom("Inter", size: 14))
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color(hex: "7F56D9"))
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.custom("Inter", size: 14))
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color.themeTextPrimary(for: colorScheme))
-                
-                Text(description)
-                    .font(.custom("Inter", size: 12))
-                    .fontWeight(.regular)
-                    .foregroundColor(Color.themeTextSecondary(for: colorScheme))
-                    .lineSpacing(2)
-            }
-            
-            Spacer()
-        }
-    }
-}
-
-struct OnboardingButton: View {
-    let title: String
-    let isPrimary: Bool
     let action: () -> Void
-    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Button(action: action) {
             Text(title)
                 .font(.custom("Inter", size: 16))
                 .fontWeight(.semibold)
-                .foregroundColor(isPrimary ? .white : Color.themeTextPrimary(for: colorScheme))
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
-                .background(buttonBackground)
+                .background(Color(hex: "27727F"))
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(isPrimary ? Color.clear : Color.themeBorder(for: colorScheme), lineWidth: 1)
+                        .strokeBorder(Color.white.opacity(0.12), lineWidth: 2)
                 )
-                .shadow(
-                    color: isPrimary ? Color.black.opacity(0.1) : Color.clear,
-                    radius: 2,
-                    x: 0,
-                    y: 1
+                .shadow(color: Color(hex: "0A0D12").opacity(0.05), radius: 1, x: 0, y: 1)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color(hex: "0A0D12").opacity(0.18), lineWidth: 1)
+                        .padding(1)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: Color(hex: "0A0D12").opacity(0.05), location: 0),
+                                    .init(color: Color.clear, location: 0.5)
+                                ],
+                                startPoint: .bottom,
+                                endPoint: .top
+                            )
+                        )
+                        .frame(height: 2)
+                        .offset(y: 21)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 )
         }
         .buttonStyle(PlainButtonStyle())
     }
+}
+
+struct OnboardingSecondaryButton: View {
+    let title: String
+    let action: () -> Void
     
-    @ViewBuilder
-    var buttonBackground: some View {
-        if isPrimary {
-            LinearGradient(
-                colors: [Color(hex: "7F56D9"), Color(hex: "9E77ED")],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-        } else {
-            Color.clear
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.custom("Inter", size: 16))
+                .fontWeight(.semibold)
+                .foregroundColor(Color(hex: "181D27"))
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(Color(hex: "FFFFFF"))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color(hex: "D5D7DA"), lineWidth: 1)
+                )
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }
