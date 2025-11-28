@@ -109,6 +109,7 @@ struct OnboardingView: View {
                     PermissionStep(
                         onNext: { onboardingState.currentStep = 6 },
                         onBack: { onboardingState.currentStep = 4 },
+                        onClose: onComplete,
                         showDebug: showDebugBorders
                     )
                 case 6:
@@ -817,119 +818,147 @@ struct WalkthroughStep4: View {
 struct PermissionStep: View {
     let onNext: () -> Void
     let onBack: () -> Void
+    let onClose: () -> Void
     let showDebug: Bool
     @State private var hasPermission = false
+    @State private var isInitialCheck = true
+    @State private var isSkipHovering = false
+    
+    // Timer to check permission periodically
+    let timer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
     
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            // Icon
-            ZStack {
-                Circle()
-                    .fill(Color(hex: "F4EBFF"))
-                    .frame(width: 56, height: 56)
-                
-                Image(systemName: "lock.shield")
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(Color(hex: "7F56D9"))
-            }
-            .debugBorder(.red, isEnabled: showDebug)
-            
-            // Text Content
-            VStack(spacing: 8) {
-                Text("Enable Accessibility")
-                    .font(.custom("Inter", size: 20))
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color(hex: "181D27"))
-                
-                Text("Clippo needs accessibility permission to paste items automatically. This allows the app to simulate keyboard shortcuts.")
-                    .font(.custom("Inter", size: 14))
-                    .fontWeight(.regular)
-                    .foregroundColor(Color(hex: "535862"))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 32)
-            }
-            .debugBorder(.blue, isEnabled: showDebug)
-            
-            // Permission Status
-            if hasPermission {
-                HStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(Color(hex: "12B76A"))
+        ZStack {
+            VStack(spacing: 0) {
+                // Content area
+                VStack(spacing: 0) {
+                    Spacer()
+                        .debugBorder(.orange, isEnabled: showDebug)
                     
-                    Text("Permission granted")
-                        .font(.custom("Inter", size: 14))
-                        .fontWeight(.medium)
-                        .foregroundColor(Color(hex: "027A48"))
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Color(hex: "ECFDF3"))
-                .cornerRadius(8)
-                .debugBorder(.green, isEnabled: showDebug)
-            }
-            
-            Spacer()
-            
-            // Buttons
-            VStack(spacing: 12) {
-                if hasPermission {
-                    OnboardingPrimaryButton(
-                        title: "Continue",
-                        action: onNext
-                    )
-                    .debugBorder(.green, isEnabled: showDebug)
-                } else {
-                    OnboardingPrimaryButton(
-                        title: "Open System Settings",
-                        action: {
-                            openAccessibilitySettings()
-                            checkPermission()
+                    VStack(spacing: 24) {
+                        // Illustration
+                        if let imagePath = Bundle.module.path(forResource: "permission-superpower", ofType: "png", inDirectory: "Resources"),
+                           let illustrationImage = NSImage(contentsOfFile: imagePath) {
+                            Image(nsImage: illustrationImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 200)
+                        } else {
+                             // Fallback
+                             Image(systemName: "lock.shield")
+                                .font(.system(size: 64))
+                                .foregroundColor(Color(hex: "7F56D9"))
                         }
-                    )
-                    .debugBorder(.green, isEnabled: showDebug)
+                        
+                        // Text Content
+                        VStack(spacing: 12) {
+                            Text("I need a tiny bit of superpower.")
+                                .font(.custom("Inter", size: 14))
+                                .fontWeight(.regular)
+                                .foregroundColor(Color(hex: "535862"))
+                            
+                            Text("Grant accessibility permission so\nI can paste clips on your behalf.")
+                                .font(.custom("Inter", size: 20))
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color(hex: "181D27"))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(.horizontal, 24)
+                        }
+                        .debugBorder(.blue, isEnabled: showDebug)
+                    }
+                    .debugBorder(.blue, isEnabled: showDebug)
                     
+                    Spacer()
+                    
+                    // Skip button positioned above the footer
                     Button(action: onNext) {
-                        Text("Skip for now")
-                            .font(.custom("Inter", size: 14))
+                        Text("Skip")
+                            .font(.custom("Inter", size: 16))
                             .fontWeight(.semibold)
-                            .foregroundColor(Color(hex: "535862"))
+                            .foregroundColor(Color(hex: "475467"))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(isSkipHovering ? Color(hex: "F9F9F9") : Color.clear)
+                            .cornerRadius(8)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .onHover { hovering in
+                        isSkipHovering = hovering
                         if hovering {
                             NSCursor.pointingHand.push()
                         } else {
                             NSCursor.pop()
                         }
                     }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 8)
+                }
+                .frame(height: 492)
+                .debugBorder(.purple, isEnabled: showDebug)
+                
+                // Footer
+                VStack(spacing: 0) {
+                    OnboardingPrimaryButton(
+                        title: "Open System Preferences",
+                        action: openAccessibilitySettings
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
                     .debugBorder(.green, isEnabled: showDebug)
                 }
+                .debugBorder(.purple, isEnabled: showDebug)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
-            .debugBorder(.purple, isEnabled: showDebug)
+            .frame(width: 424, height: 552)
+            
+            // Floating buttons
+            VStack {
+                HStack {
+                    OnboardingIconButton(
+                        icon: "icon-back",
+                        action: onBack
+                    )
+                    .debugBorder(.green, isEnabled: showDebug)
+                    
+                    Spacer()
+                    
+                    OnboardingIconButton(
+                        icon: "icon-close",
+                        action: onClose
+                    )
+                    .debugBorder(.green, isEnabled: showDebug)
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
+                
+                Spacer()
+            }
+            .frame(width: 424, height: 552)
+            .debugBorder(.yellow, isEnabled: showDebug)
         }
-        .padding(.top, 80)
+        .onReceive(timer) { _ in
+            checkPermission(autoAdvance: true)
+        }
         .onAppear {
-            checkPermission()
+            checkPermission(autoAdvance: false)
         }
-        .debugBorder(.yellow, isEnabled: showDebug)
     }
     
-    func checkPermission() {
-        hasPermission = AXIsProcessTrusted()
+    private func openAccessibilitySettings() {
+        let urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+        if let url = URL(string: urlString) {
+            NSWorkspace.shared.open(url)
+        }
     }
     
-    func openAccessibilitySettings() {
-        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-        NSWorkspace.shared.open(url)
+    private func checkPermission(autoAdvance: Bool) {
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String : false]
+        let trusted = AXIsProcessTrustedWithOptions(options)
         
-        // Check permission after a delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            checkPermission()
+        hasPermission = trusted
+        
+        if trusted && autoAdvance {
+            onNext()
         }
     }
 }
