@@ -75,78 +75,99 @@ struct HelloStep: View {
     let onClose: () -> Void
     
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            // Main content card
+        ZStack {
+            // Main content card - 552px total height
             VStack(spacing: 0) {
-                Spacer()
-                
-                // Clippo Illustration
-                if let imagePath = Bundle.module.path(forResource: "clippo-waving-hello", ofType: "png", inDirectory: "Resources"),
-                   let clippoImage = NSImage(contentsOfFile: imagePath) {
-                    Image(nsImage: clippoImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 184, height: 184)
-                } else {
-                    // Fallback to system image
-                    ZStack {
-                        Circle()
-                            .fill(Color(hex: "F5F5F5"))
-                            .frame(width: 120, height: 120)
-                        
-                        Image(systemName: "hand.wave.fill")
-                            .font(.system(size: 48, weight: .light))
-                            .foregroundColor(Color(hex: "7F56D9"))
-                    }
-                }
-                
-                // Text Content
-                VStack(spacing: 2) {
-                    Text("Hi, I'm Clippo!")
-                        .font(.custom("Inter", size: 20))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(hex: "181D27"))
+                // Content area - 492px height
+                VStack(spacing: 0) {
+                    Spacer()
                     
-                    VStack(spacing: 4) {
-                        Text("I remember what you copy.")
-                            .font(.custom("Inter", size: 14))
-                            .fontWeight(.regular)
-                            .foregroundColor(Color(hex: "535862"))
-                            .multilineTextAlignment(.center)
-                        
-                        Text("Let me give you a 20-second tour.")
-                            .font(.custom("Inter", size: 14))
-                            .fontWeight(.regular)
-                            .foregroundColor(Color(hex: "535862"))
-                            .multilineTextAlignment(.center)
+                    // Clippo Illustration
+                    if let imagePath = Bundle.module.path(forResource: "clippo-waving-hello", ofType: "png", inDirectory: "Resources"),
+                       let clippoImage = NSImage(contentsOfFile: imagePath) {
+                        Image(nsImage: clippoImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 184, height: 184)
+                    } else {
+                        // Fallback to system image
+                        ZStack {
+                            Circle()
+                                .fill(Color(hex: "F5F5F5"))
+                                .frame(width: 120, height: 120)
+                            
+                            Image(systemName: "hand.wave.fill")
+                                .font(.system(size: 48, weight: .light))
+                                .foregroundColor(Color(hex: "7F56D9"))
+                        }
+                        .frame(width: 184, height: 184)
                     }
-                    .padding(.horizontal, 48)
-                    .padding(.top, 8)
+                    
+                    // Spacing between illustration and text
+                    Spacer()
+                        .frame(height: 24)
+                    
+                    // Text Content
+                    VStack(spacing: 8) {
+                        Text("Hi, I'm Clippo!")
+                            .font(.custom("Inter", size: 20))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(hex: "181D27"))
+                        
+                        VStack(spacing: 0) {
+                            Text("I remember what you copy.")
+                                .font(.custom("Inter", size: 14))
+                                .fontWeight(.regular)
+                                .foregroundColor(Color(hex: "535862"))
+                                .multilineTextAlignment(.center)
+                            
+                            Text("Let me give you a 20-second tour.")
+                                .font(.custom("Inter", size: 14))
+                                .fontWeight(.regular)
+                                .foregroundColor(Color(hex: "535862"))
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    
+                    Spacer()
                 }
-                .frame(height: 112)
+                .frame(height: 492) // Content area height
+                .frame(maxWidth: .infinity)
+                
+                // Footer with button - 60px height (44px button + 16px bottom padding)
+                VStack(spacing: 0) {
+                    OnboardingPrimaryButton(
+                        title: "Next",
+                        action: onNext
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 24)
+                }
+            }
+            .frame(width: 424, height: 552)
+            .background(Color(hex: "FFFFFF"))
+            .cornerRadius(16)
+            
+            // Close button floating at top-right
+            VStack {
+                HStack {
+                    Spacer()
+                    
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "A4A7AE"))
+                            .frame(width: 24, height: 24)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(8)
+                }
+                .padding(.top, 24)
+                .padding(.trailing, 24)
                 
                 Spacer()
-                
-                // Next Button
-                OnboardingPrimaryButton(
-                    title: "Next",
-                    action: onNext
-                )
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
             }
-            .frame(width: 424, height: 492)
-            
-            // Close button floating outside content
-            Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(Color(hex: "A4A7AE"))
-                    .frame(width: 24, height: 24)
-            }
-            .buttonStyle(PlainButtonStyle())
-            .padding(8)
-            .offset(y: -24) // 24px above the card
+            .frame(width: 424, height: 552)
         }
     }
 }
