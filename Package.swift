@@ -18,7 +18,9 @@ let package = Package(
                 "OverlayWindow.swift",
                 "OnboardingView.swift",
                 "OnboardingWindowController.swift",
-                "OnboardingState.swift"
+                "OnboardingState.swift",
+                "SettingsView.swift",
+                "SettingsWindowController.swift"
             ],
             resources: [
                 .copy("Resources")

@@ -13,20 +13,18 @@ struct ClippoApp: App {
 }
 
 enum AppAppearance: String, CaseIterable {
-    case system = "System"
     case light = "Light"
     case dark = "Dark"
     
     var nsAppearance: NSAppearance? {
         switch self {
-        case .system: return nil
         case .light: return NSAppearance(named: .aqua)
         case .dark: return NSAppearance(named: .darkAqua)
         }
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var overlayWindow: OverlayWindow!
     var hostingController: NSHostingController<ContentView>!
     var isPasting: Bool = false {
@@ -39,6 +37,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // Onboarding
     var onboardingWindowController: OnboardingWindowController?
+    var settingsWindowController: SettingsWindowController?
     
     var isOnboardingComplete: Bool {
         UserDefaults.standard.bool(forKey: "onboardingComplete")
@@ -57,7 +56,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                let appearance = AppAppearance(rawValue: rawValue) {
                 return appearance
             }
-            return .system
+            return .light
         }
         set {
             UserDefaults.standard.set(newValue.rawValue, forKey: "appAppearance")
@@ -116,27 +115,53 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         let menu = NSMenu()
+        menu.delegate = self
         
-        // Appearance Menu
-        let appearanceMenu = NSMenu()
-        for appearance in AppAppearance.allCases {
-            let item = NSMenuItem(title: appearance.rawValue, action: #selector(changeAppearance(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = appearance
-            if appearance == currentAppearance {
-                item.state = .on
-            }
-            appearanceMenu.addItem(item)
-        }
-        let appearanceItem = NSMenuItem(title: "Appearance", action: nil, keyEquivalent: "")
-        appearanceItem.submenu = appearanceMenu
+        // Section 1
+        // Grant Permission (Tag: 1)
+        let grantItem = NSMenuItem(title: "Grant Paste Permission", action: #selector(openSystemSettings), keyEquivalent: "")
+        grantItem.tag = 1
+        grantItem.image = NSImage(systemSymbolName: "lock.shield", accessibilityDescription: nil)
+        menu.addItem(grantItem)
+        
+        // How it works
+        let howToItem = NSMenuItem(title: "How it works", action: #selector(resetOnboarding), keyEquivalent: "")
+        howToItem.image = NSImage(systemSymbolName: "info.circle", accessibilityDescription: nil)
+        menu.addItem(howToItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        // Section 2 - Settings Header
+        let settingsHeader = NSMenuItem()
+        let headerView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 22))
+        let headerLabel = NSTextField(labelWithString: "Settings")
+        headerLabel.font = .systemFont(ofSize: 11, weight: .semibold)
+        headerLabel.textColor = .tertiaryLabelColor
+        headerLabel.frame = NSRect(x: 12, y: 2, width: 180, height: 16)
+        headerView.addSubview(headerLabel)
+        settingsHeader.view = headerView
+        menu.addItem(settingsHeader)
+        
+        // Clear History
+        let clearItem = NSMenuItem(title: "Clear History", action: #selector(clearHistory), keyEquivalent: "")
+        clearItem.image = NSImage(systemSymbolName: "trash", accessibilityDescription: nil)
+        menu.addItem(clearItem)
+        
+        // Appearance (Tag: 2)
+        let appearanceItem = NSMenuItem(title: "Dark Mode", action: #selector(toggleAppearance), keyEquivalent: "")
+        appearanceItem.tag = 2
+        appearanceItem.image = NSImage(systemSymbolName: "moon", accessibilityDescription: nil)
         menu.addItem(appearanceItem)
         
+        // Change Hotkey (Tag: 3)
+        let hotkeyItem = NSMenuItem(title: "Change Hotkey", action: #selector(openSettings), keyEquivalent: "")
+        hotkeyItem.tag = 3
+        hotkeyItem.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: nil)
+        menu.addItem(hotkeyItem)
+        
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Show Onboarding", action: #selector(resetOnboarding), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Clear History", action: #selector(clearHistory), keyEquivalent: "c"))
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Clippo", action: #selector(quitApp), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit Clippo", action: #selector(quitApp), keyEquivalent: ""))
+        
         statusItem.menu = menu
         
         // Apply saved appearance
@@ -165,17 +190,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
     
-    @objc func changeAppearance(_ sender: NSMenuItem) {
-        if let appearance = sender.representedObject as? AppAppearance {
-            currentAppearance = appearance
-            
-            // Update menu state
-            if let menu = sender.menu {
-                for item in menu.items {
-                    item.state = (item == sender) ? .on : .off
-                }
-            }
-        }
+    @objc func toggleAppearance() {
+        currentAppearance = (currentAppearance == .light) ? .dark : .light
     }
     
     @objc func resetOnboarding() {
@@ -183,6 +199,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             onboardingWindowController = OnboardingWindowController()
         }
         onboardingWindowController?.resetAndShow()
+    }
+    
+    @objc func openSettings() {
+        if settingsWindowController == nil {
+            settingsWindowController = SettingsWindowController()
+        }
+        settingsWindowController?.show()
     }
     
     @objc func clearHistory() {
@@ -341,5 +364,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         vDown?.post(tap: .cghidEventTap)
         vUp?.post(tap: .cghidEventTap)
         cmdUp?.post(tap: .cghidEventTap)
+    }
+    
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        if let grantItem = menu.item(withTag: 1) {
+            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String : false]
+            let trusted = AXIsProcessTrustedWithOptions(options)
+            grantItem.isHidden = trusted
+        }
+        
+        if let appearanceItem = menu.item(withTag: 2) {
+            let isLight = currentAppearance == .light
+            appearanceItem.title = isLight ? "Dark Mode" : "Light Mode"
+            appearanceItem.image = NSImage(systemSymbolName: isLight ? "moon" : "sun.max", accessibilityDescription: nil)
+        }
+        
+        if let hotkeyItem = menu.item(withTag: 3) {
+            let shortcut = HotKeyManager.shared.shortcutString
+            let title = NSMutableAttributedString(string: "Change Hotkey")
+            
+            // Add spacing and shortcut on the right
+            let spacing = String(repeating: " ", count: 10)
+            let shortcutText = NSAttributedString(
+                string: spacing + shortcut,
+                attributes: [
+                    .foregroundColor: NSColor.secondaryLabelColor,
+                    .font: NSFont.systemFont(ofSize: 13)
+                ]
+            )
+            title.append(shortcutText)
+            hotkeyItem.attributedTitle = title
+        }
+    }
+    
+    @objc func openSystemSettings() {
+        let urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+        if let url = URL(string: urlString) {
+            NSWorkspace.shared.open(url)
+        }
     }
 }
