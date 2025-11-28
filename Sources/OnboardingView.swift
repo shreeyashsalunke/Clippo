@@ -144,22 +144,7 @@ struct OnboardingView: View {
             .cornerRadius(16)
             .debugBorder(.green, isEnabled: showDebugBorders)
             
-            // Debug Toggle
-            VStack {
-                Spacer()
-                HStack {
-                    Toggle("Debug Layout", isOn: $showDebugBorders)
-                        .toggleStyle(SwitchToggleStyle(tint: .red))
-                        .font(.system(size: 10))
-                        .padding(8)
-                        .background(Color.white.opacity(0.9))
-                        .cornerRadius(8)
-                        .shadow(radius: 2)
-                    Spacer()
-                }
-                .padding(.leading, -100) // Move it outside the card to the left
-                .padding(.bottom, 20)
-            }
+
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)
@@ -837,7 +822,7 @@ struct PermissionStep: View {
     @State private var isSkipHovering = false
     
     // Timer to check permission periodically
-    let timer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
         ZStack {
