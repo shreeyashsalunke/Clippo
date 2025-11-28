@@ -13,10 +13,18 @@ struct OnboardingIconButton: View {
                 .fill(isHovering ? Color(hex: "F5F5F5") : Color.clear)
             
             // Icon
-            Image(systemName: icon)
-                .font(.system(size: 14, weight: .regular))
-                .foregroundColor(Color(hex: "A4A7AE"))
-                .frame(width: 24, height: 24)
+            if let imagePath = Bundle.module.path(forResource: icon, ofType: "png", inDirectory: "Resources"),
+               let nsImage = NSImage(contentsOfFile: imagePath) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 44, height: 44)
+            } else {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(Color(hex: "A4A7AE"))
+                    .frame(width: 24, height: 24)
+            }
         }
         .frame(width: 44, height: 44)
         .contentShape(Rectangle()) // Make entire area clickable
@@ -241,7 +249,7 @@ struct HelloStep: View {
                     Spacer()
                     
                     OnboardingIconButton(
-                        icon: "xmark",
+                        icon: "icon-close",
                         action: onClose
                     )
                     .debugBorder(.green, isEnabled: showDebug)
@@ -268,19 +276,11 @@ struct WalkthroughStep1: View {
         ZStack {
             VStack(spacing: 0) {
                 // Content area
-                VStack(spacing: 24) {
+                VStack(spacing: 0) {
                     Spacer()
-                        .frame(height: 68) // Space for floating buttons
                         .debugBorder(.orange, isEnabled: showDebug)
                     
-                    VStack(spacing: 12) {
-                        // "How it works?" title
-                        Text("How it works?")
-                            .font(.custom("Inter", size: 14))
-                            .fontWeight(.regular)
-                            .foregroundColor(Color(hex: "535862"))
-                            .debugBorder(.red, isEnabled: showDebug)
-                        
+                    VStack(spacing: 24) {
                         // Illustration
                         Group {
                             if let imagePath = Bundle.module.path(forResource: "walkthrough-illustration", ofType: "png", inDirectory: "Resources"),
@@ -344,7 +344,6 @@ struct WalkthroughStep1: View {
                                 .fill(Color(hex: "D5D7DA"))
                                 .frame(width: 8, height: 8)
                         }
-                        .padding(.top, 8)
                         .debugBorder(.blue, isEnabled: showDebug)
                     }
                     .debugBorder(.blue, isEnabled: showDebug)
@@ -372,15 +371,22 @@ struct WalkthroughStep1: View {
             VStack {
                 HStack {
                     OnboardingIconButton(
-                        icon: "arrow.left",
+                        icon: "icon-back",
                         action: onBack
                     )
                     .debugBorder(.green, isEnabled: showDebug)
                     
                     Spacer()
                     
+                    Text("How it works?")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                    
+                    Spacer()
+                    
                     OnboardingIconButton(
-                        icon: "xmark",
+                        icon: "icon-close",
                         action: onClose
                     )
                     .debugBorder(.green, isEnabled: showDebug)
@@ -406,35 +412,39 @@ struct WalkthroughStep2: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                VStack(spacing: 24) {
+                // Content area
+                VStack(spacing: 0) {
                     Spacer()
-                        .frame(height: 68)
                         .debugBorder(.orange, isEnabled: showDebug)
                     
-                    VStack(spacing: 12) {
-                        // "How it works?" title
-                        Text("How it works?")
-                            .font(.custom("Inter", size: 14))
-                            .fontWeight(.regular)
-                            .foregroundColor(Color(hex: "535862"))
-                            .debugBorder(.red, isEnabled: showDebug)
-                        
-                        // Illustration placeholder
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(hex: "F5F5F5"))
-                                .frame(height: 160)
-                            
-                            VStack(spacing: 8) {
-                                Image(systemName: "rectangle.on.rectangle")
-                                    .font(.system(size: 48, weight: .light))
-                                    .foregroundColor(Color(hex: "7F56D9"))
-                                
-                                HStack(spacing: 4) {
-                                    Text("⌘ + ⇧ + V")
-                                        .font(.custom("Inter", size: 18))
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(Color(hex: "181D27"))
+                    VStack(spacing: 24) {
+                        // Illustration
+                        Group {
+                            if let imagePath = Bundle.module.path(forResource: "walkthrough-open", ofType: "png", inDirectory: "Resources"),
+                               let illustrationImage = NSImage(contentsOfFile: imagePath) {
+                                Image(nsImage: illustrationImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(height: 200)
+                            } else {
+                                // Fallback illustration
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(hex: "F5F5F5"))
+                                        .frame(height: 160)
+                                    
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "rectangle.on.rectangle")
+                                            .font(.system(size: 48, weight: .light))
+                                            .foregroundColor(Color(hex: "7F56D9"))
+                                        
+                                        HStack(spacing: 4) {
+                                            Text("⌘ + ⇧ + V")
+                                                .font(.custom("Inter", size: 18))
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(Color(hex: "181D27"))
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -448,7 +458,7 @@ struct WalkthroughStep2: View {
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(hex: "181D27"))
                             
-                            Text("Press ⌘ + ⇧ + V to open your clipboard history window.")
+                            Text("Press ⌘⇧V to open your \n clipboard history window.")
                                 .font(.custom("Inter", size: 14))
                                 .fontWeight(.regular)
                                 .foregroundColor(Color(hex: "535862"))
@@ -473,7 +483,6 @@ struct WalkthroughStep2: View {
                                 .fill(Color(hex: "D5D7DA"))
                                 .frame(width: 8, height: 8)
                         }
-                        .padding(.top, 8)
                         .debugBorder(.blue, isEnabled: showDebug)
                     }
                     .debugBorder(.blue, isEnabled: showDebug)
@@ -501,15 +510,22 @@ struct WalkthroughStep2: View {
             VStack {
                 HStack {
                     OnboardingIconButton(
-                        icon: "arrow.left",
+                        icon: "icon-back",
                         action: onBack
                     )
                     .debugBorder(.green, isEnabled: showDebug)
                     
                     Spacer()
                     
+                    Text("How it works?")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                    
+                    Spacer()
+                    
                     OnboardingIconButton(
-                        icon: "xmark",
+                        icon: "icon-close",
                         action: onClose
                     )
                     .debugBorder(.green, isEnabled: showDebug)
@@ -535,34 +551,37 @@ struct WalkthroughStep3: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                VStack(spacing: 24) {
+                VStack(spacing: 0) {
                     Spacer()
-                        .frame(height: 68)
                         .debugBorder(.orange, isEnabled: showDebug)
                     
-                    VStack(spacing: 12) {
-                        // "How it works?" title
-                        Text("How it works?")
-                            .font(.custom("Inter", size: 14))
-                            .fontWeight(.regular)
-                            .foregroundColor(Color(hex: "535862"))
-                            .debugBorder(.red, isEnabled: showDebug)
-                        
-                        // Illustration placeholder
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(hex: "F5F5F5"))
-                                .frame(height: 160)
-                            
-                            VStack(spacing: 8) {
-                                Image(systemName: "arrow.up.arrow.down")
-                                    .font(.system(size: 48, weight: .light))
-                                    .foregroundColor(Color(hex: "7F56D9"))
-                                
-                                Text("Keep holding ⌘ + ⇧")
-                                    .font(.custom("Inter", size: 16))
-                                    .fontWeight(.medium)
-                                    .foregroundColor(Color(hex: "181D27"))
+                    VStack(spacing: 24) {
+                        // Illustration
+                        Group {
+                            if let imagePath = Bundle.module.path(forResource: "walkthrough-navigate", ofType: "png", inDirectory: "Resources"),
+                               let illustrationImage = NSImage(contentsOfFile: imagePath) {
+                                Image(nsImage: illustrationImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(height: 200)
+                            } else {
+                                // Fallback illustration
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(hex: "F5F5F5"))
+                                        .frame(height: 160)
+                                    
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "arrow.up.arrow.down")
+                                            .font(.system(size: 48, weight: .light))
+                                            .foregroundColor(Color(hex: "7F56D9"))
+                                        
+                                        Text("Keep holding ⌘ + ⇧")
+                                            .font(.custom("Inter", size: 16))
+                                            .fontWeight(.medium)
+                                            .foregroundColor(Color(hex: "181D27"))
+                                    }
+                                }
                             }
                         }
                         .padding(.horizontal, 24)
@@ -575,7 +594,7 @@ struct WalkthroughStep3: View {
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(hex: "181D27"))
                             
-                            Text("Keep holding ⌘ + ⇧ and press V repeatedly to cycle through your clipboard items.")
+                            Text("Keep holding ⌘⇧ and press V repeatedly \n to cycle through your clipboard items.")
                                 .font(.custom("Inter", size: 14))
                                 .fontWeight(.regular)
                                 .foregroundColor(Color(hex: "535862"))
@@ -600,7 +619,6 @@ struct WalkthroughStep3: View {
                                 .fill(Color(hex: "D5D7DA"))
                                 .frame(width: 8, height: 8)
                         }
-                        .padding(.top, 8)
                         .debugBorder(.blue, isEnabled: showDebug)
                     }
                     .debugBorder(.blue, isEnabled: showDebug)
@@ -628,15 +646,22 @@ struct WalkthroughStep3: View {
             VStack {
                 HStack {
                     OnboardingIconButton(
-                        icon: "arrow.left",
+                        icon: "icon-back",
                         action: onBack
                     )
                     .debugBorder(.green, isEnabled: showDebug)
                     
                     Spacer()
                     
+                    Text("How it works?")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                    
+                    Spacer()
+                    
                     OnboardingIconButton(
-                        icon: "xmark",
+                        icon: "icon-close",
                         action: onClose
                     )
                     .debugBorder(.green, isEnabled: showDebug)
@@ -662,34 +687,37 @@ struct WalkthroughStep4: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                VStack(spacing: 24) {
+                VStack(spacing: 0) {
                     Spacer()
-                        .frame(height: 68)
                         .debugBorder(.orange, isEnabled: showDebug)
                     
-                    VStack(spacing: 12) {
-                        // "How it works?" title
-                        Text("How it works?")
-                            .font(.custom("Inter", size: 14))
-                            .fontWeight(.regular)
-                            .foregroundColor(Color(hex: "535862"))
-                            .debugBorder(.red, isEnabled: showDebug)
-                        
-                        // Illustration placeholder
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(hex: "F5F5F5"))
-                                .frame(height: 160)
-                            
-                            VStack(spacing: 8) {
-                                Image(systemName: "doc.on.clipboard")
-                                    .font(.system(size: 48, weight: .light))
-                                    .foregroundColor(Color(hex: "7F56D9"))
-                                
-                                Text("Release keys")
-                                    .font(.custom("Inter", size: 16))
-                                    .fontWeight(.medium)
-                                    .foregroundColor(Color(hex: "181D27"))
+                    VStack(spacing: 24) {
+                        // Illustration
+                        Group {
+                            if let imagePath = Bundle.module.path(forResource: "walkthrough-paste", ofType: "png", inDirectory: "Resources"),
+                               let illustrationImage = NSImage(contentsOfFile: imagePath) {
+                                Image(nsImage: illustrationImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(height: 200)
+                            } else {
+                                // Fallback illustration
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(hex: "F5F5F5"))
+                                        .frame(height: 160)
+                                    
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "doc.on.clipboard")
+                                            .font(.system(size: 48, weight: .light))
+                                            .foregroundColor(Color(hex: "7F56D9"))
+                                        
+                                        Text("Release keys")
+                                            .font(.custom("Inter", size: 16))
+                                            .fontWeight(.medium)
+                                            .foregroundColor(Color(hex: "181D27"))
+                                    }
+                                }
                             }
                         }
                         .padding(.horizontal, 24)
@@ -697,12 +725,12 @@ struct WalkthroughStep4: View {
                         
                         // Text Content
                         VStack(spacing: 4) {
-                            Text("Paste selected item")
+                            Text("Release keys to paste")
                                 .font(.custom("Inter", size: 18))
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(hex: "181D27"))
                             
-                            Text("Release the keys to automatically paste the selected clipboard item.")
+                            Text("Release the keys to automatically paste \n the selected clipboard item.")
                                 .font(.custom("Inter", size: 14))
                                 .fontWeight(.regular)
                                 .foregroundColor(Color(hex: "535862"))
@@ -727,7 +755,6 @@ struct WalkthroughStep4: View {
                                 .fill(Color(hex: "27727F"))
                                 .frame(width: 8, height: 8)
                         }
-                        .padding(.top, 8)
                         .debugBorder(.blue, isEnabled: showDebug)
                     }
                     .debugBorder(.blue, isEnabled: showDebug)
@@ -755,15 +782,22 @@ struct WalkthroughStep4: View {
             VStack {
                 HStack {
                     OnboardingIconButton(
-                        icon: "arrow.left",
+                        icon: "icon-back",
                         action: onBack
                     )
                     .debugBorder(.green, isEnabled: showDebug)
                     
                     Spacer()
                     
+                    Text("How it works?")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.regular)
+                        .foregroundColor(Color(hex: "535862"))
+                    
+                    Spacer()
+                    
                     OnboardingIconButton(
-                        icon: "xmark",
+                        icon: "icon-close",
                         action: onClose
                     )
                     .debugBorder(.green, isEnabled: showDebug)
