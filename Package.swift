@@ -21,7 +21,7 @@ let package = Package(
                 "OnboardingState.swift"
             ],
             resources: [
-                .copy("../Design")
+                .copy("Resources")
             ]
         )
     ]

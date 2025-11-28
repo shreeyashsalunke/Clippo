@@ -80,8 +80,8 @@ struct HelloStep: View {
             Spacer()
             
             // Clippo Illustration
-            if let resourcePath = Bundle.main.resourcePath,
-               let clippoImage = NSImage(contentsOfFile: resourcePath + "/Design/Assets/clippo-waving-hello.png") {
+            if let imagePath = Bundle.module.path(forResource: "clippo-waving-hello", ofType: "png", inDirectory: "Resources"),
+               let clippoImage = NSImage(contentsOfFile: imagePath) {
                 Image(nsImage: clippoImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
