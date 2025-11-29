@@ -26,14 +26,19 @@ class ClipboardManager: ObservableObject {
         if pasteboard.changeCount != lastChangeCount {
             lastChangeCount = pasteboard.changeCount
             
-            // Get frontmost app for filtering
-            let frontmostBundleID = PasswordDetector.getFrontmostAppBundleID()
+            // Check if password protection is enabled
+            let isPasswordProtectionEnabled = UserDefaults.standard.bool(forKey: "passwordProtectionEnabled")
             
-            // Check if we should ignore based on source app
-            if PasswordDetector.shouldIgnoreFromApp(frontmostBundleID) {
-                lastIgnoredReason = "Clippo ignores clipboard copies from password managers for your privacy."
-                print("Ignored clipboard from password manager: \(frontmostBundleID ?? "unknown")")
-                return
+            if isPasswordProtectionEnabled {
+                // Get frontmost app for filtering
+                let frontmostBundleID = PasswordDetector.getFrontmostAppBundleID()
+                
+                // Check if we should ignore based on source app
+                if PasswordDetector.shouldIgnoreFromApp(frontmostBundleID) {
+                    lastIgnoredReason = "Clippo ignores clipboard copies from password managers for your privacy."
+                    print("Ignored clipboard from password manager: \(frontmostBundleID ?? "unknown")")
+                    return
+                }
             }
             
             // Check for Image
@@ -44,8 +49,8 @@ class ClipboardManager: ObservableObject {
             }
             // Check for Text
             else if let str = pasteboard.string(forType: .string) {
-                // Check if content looks like a password/secret
-                if PasswordDetector.isLikelySecret(str) {
+                // Check if content looks like a password/secret (only if protection is enabled)
+                if isPasswordProtectionEnabled && PasswordDetector.isLikelySecret(str) {
                     lastIgnoredReason = "Clippo ignores clipboard copies from password managers for your privacy."
                     print("Ignored password-like content: \(str.prefix(10))...")
                     return

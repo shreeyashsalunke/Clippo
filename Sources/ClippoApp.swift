@@ -81,6 +81,28 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     var statusItem: NSStatusItem!
     
+    var isPasswordProtectionEnabled: Bool {
+        get {
+            // Default to true if not set
+            if !UserDefaults.standard.bool(forKey: "passwordProtectionConfigured") {
+                UserDefaults.standard.set(true, forKey: "passwordProtectionEnabled")
+                UserDefaults.standard.set(true, forKey: "passwordProtectionConfigured")
+                return true
+            }
+            return UserDefaults.standard.bool(forKey: "passwordProtectionEnabled")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "passwordProtectionEnabled")
+            UserDefaults.standard.set(true, forKey: "passwordProtectionConfigured")
+        }
+    }
+    
+    // Helper to create menu icon with specific sizing
+    func createMenuIcon(systemName: String, size: CGFloat = 20) -> NSImage? {
+        let config = NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
+        return NSImage(systemSymbolName: systemName, accessibilityDescription: nil)?.withSymbolConfiguration(config)
+    }
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Check Accessibility Permissions
         checkAccessibilityPermissions()
@@ -125,12 +147,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Grant Permission (Tag: 1)
         let grantItem = NSMenuItem(title: "Grant Paste Permission", action: #selector(openSystemSettings), keyEquivalent: "")
         grantItem.tag = 1
-        grantItem.image = NSImage(systemSymbolName: "lock.shield", accessibilityDescription: nil)
+        grantItem.image = createMenuIcon(systemName: "lock.shield")
         menu.addItem(grantItem)
         
         // How it works
         let howToItem = NSMenuItem(title: "How it works", action: #selector(resetOnboarding), keyEquivalent: "")
-        howToItem.image = NSImage(systemSymbolName: "info.circle", accessibilityDescription: nil)
+        howToItem.image = createMenuIcon(systemName: "info.circle")
         menu.addItem(howToItem)
         
         menu.addItem(NSMenuItem.separator())
@@ -148,20 +170,79 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         // Clear History
         let clearItem = NSMenuItem(title: "Clear History", action: #selector(clearHistory), keyEquivalent: "")
-        clearItem.image = NSImage(systemSymbolName: "trash", accessibilityDescription: nil)
+        clearItem.image = createMenuIcon(systemName: "trash")
         menu.addItem(clearItem)
         
         // Appearance (Tag: 2)
         let appearanceItem = NSMenuItem(title: "Dark Mode", action: #selector(toggleAppearance), keyEquivalent: "")
         appearanceItem.tag = 2
-        appearanceItem.image = NSImage(systemSymbolName: "moon", accessibilityDescription: nil)
+        appearanceItem.image = createMenuIcon(systemName: "moon")
         menu.addItem(appearanceItem)
         
         // Change Hotkey (Tag: 3)
-        let hotkeyItem = NSMenuItem(title: "Change Hotkey", action: #selector(openSettings), keyEquivalent: "")
+        let hotkeyItem = NSMenuItem()
         hotkeyItem.tag = 3
-        hotkeyItem.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: nil)
+        
+        // Use standard image for perfect alignment
+        if let icon = createMenuIcon(systemName: "keyboard", size: 15) {
+            hotkeyItem.image = icon
+        }
+        hotkeyItem.action = #selector(openSettings)
+        hotkeyItem.target = self
+        
+        // Use attributed string with tab stops for alignment
+        let shortcut = HotKeyManager.shared.shortcutString
+        let title = NSMutableAttributedString(string: "Change Hotkey\t\(shortcut)")
+        
+        // Create paragraph style with tab stop at the end
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.tabStops = [NSTextTab(textAlignment: .right, location: 230, options: [:])] // Adjust location as needed
+        
+        title.addAttributes([
+            .font: NSFont.menuFont(ofSize: 14),
+            .paragraphStyle: paragraphStyle,
+            .foregroundColor: NSColor.labelColor
+        ], range: NSRange(location: 0, length: title.length))
+        
+        // Style the shortcut part differently
+        let shortcutRange = (title.string as NSString).range(of: shortcut)
+        title.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: shortcutRange)
+        
+        hotkeyItem.attributedTitle = title
         menu.addItem(hotkeyItem)
+        
+        // Password Protection (Tag: 4)
+        let passwordProtectionItem = NSMenuItem(title: "Ignore Sensitive Content", action: nil, keyEquivalent: "")
+        passwordProtectionItem.tag = 4
+        passwordProtectionItem.image = createMenuIcon(systemName: "eye.slash")
+        
+        // Create attributed title with "Experimental" subtext
+        let mainTitle = NSMutableAttributedString(string: "Ignore Sensitive Content")
+        mainTitle.addAttribute(.font, value: NSFont.systemFont(ofSize: 13), range: NSRange(location: 0, length: mainTitle.length))
+        
+        let experimental = NSAttributedString(
+            string: "\nExperimental",
+            attributes: [
+                .font: NSFont.systemFont(ofSize: 11),
+                .foregroundColor: NSColor.secondaryLabelColor
+            ]
+        )
+        mainTitle.append(experimental)
+        passwordProtectionItem.attributedTitle = mainTitle
+        
+        // Create submenu
+        let passwordSubmenu = NSMenu()
+        
+        let enableItem = NSMenuItem(title: "Enable", action: #selector(enablePasswordProtection), keyEquivalent: "")
+        enableItem.target = self
+        passwordSubmenu.addItem(enableItem)
+        
+        let disableItem = NSMenuItem(title: "Disable", action: #selector(disablePasswordProtection), keyEquivalent: "")
+        disableItem.target = self
+        passwordSubmenu.addItem(disableItem)
+        
+        passwordProtectionItem.submenu = passwordSubmenu
+        menu.addItem(passwordProtectionItem)
         
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit Clippo", action: #selector(quitApp), keyEquivalent: ""))
@@ -209,6 +290,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     @objc func toggleAppearance() {
         currentAppearance = (currentAppearance == .light) ? .dark : .light
+    }
+    
+    @objc func enablePasswordProtection() {
+        isPasswordProtectionEnabled = true
+        print("Password protection: enabled")
+    }
+    
+    @objc func disablePasswordProtection() {
+        isPasswordProtectionEnabled = false
+        print("Password protection: disabled")
     }
     
     @objc func resetOnboarding() {
@@ -404,24 +495,41 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if let appearanceItem = menu.item(withTag: 2) {
             let isLight = currentAppearance == .light
             appearanceItem.title = isLight ? "Dark Mode" : "Light Mode"
-            appearanceItem.image = NSImage(systemSymbolName: isLight ? "moon" : "sun.max", accessibilityDescription: nil)
+            appearanceItem.image = createMenuIcon(systemName: isLight ? "moon" : "sun.max")
         }
         
+        
+        // Update hotkey shortcut
         if let hotkeyItem = menu.item(withTag: 3) {
             let shortcut = HotKeyManager.shared.shortcutString
-            let title = NSMutableAttributedString(string: "Change Hotkey")
+            let title = NSMutableAttributedString(string: "Change Hotkey\t\(shortcut)")
             
-            // Add spacing and shortcut on the right
-            let spacing = String(repeating: " ", count: 10)
-            let shortcutText = NSAttributedString(
-                string: spacing + shortcut,
-                attributes: [
-                    .foregroundColor: NSColor.secondaryLabelColor,
-                    .font: NSFont.systemFont(ofSize: 13)
-                ]
-            )
-            title.append(shortcutText)
+            // Re-apply paragraph style for alignment
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.tabStops = [NSTextTab(textAlignment: .right, location: 230, options: [:])]
+            
+            title.addAttributes([
+                .font: NSFont.menuFont(ofSize: 14),
+                .paragraphStyle: paragraphStyle,
+                .foregroundColor: NSColor.labelColor
+            ], range: NSRange(location: 0, length: title.length))
+            
+            let shortcutRange = (title.string as NSString).range(of: shortcut)
+            title.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: shortcutRange)
+            
             hotkeyItem.attributedTitle = title
+        }
+        
+        // Update password protection submenu checkmarks
+        if let passwordItem = menu.item(withTag: 4),
+           let submenu = passwordItem.submenu {
+            for item in submenu.items {
+                if item.title == "Enable" {
+                    item.state = isPasswordProtectionEnabled ? .on : .off
+                } else if item.title == "Disable" {
+                    item.state = isPasswordProtectionEnabled ? .off : .on
+                }
+            }
         }
     }
     
@@ -432,3 +540,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 }
+
+
+
