@@ -12,7 +12,19 @@ class StatusBarController {
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clippo")
+            if let iconImage = NSImage(contentsOfFile: Bundle.main.path(forResource: "status-bar-icon", ofType: "png") ?? "") {
+                // Resize the 4x image to proper status bar size
+                let resizedImage = NSImage(size: NSSize(width: 18, height: 18))
+                resizedImage.lockFocus()
+                iconImage.draw(in: NSRect(x: 0, y: 0, width: 18, height: 18))
+                resizedImage.unlockFocus()
+                // Use template mode for automatic color adaptation (black icon with transparency)
+                resizedImage.isTemplate = true
+                button.image = resizedImage
+            } else {
+                // Fallback to system icon if custom icon not found
+                button.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clippo")
+            }
             button.action = #selector(togglePopover(_:))
             button.target = self
         }
