@@ -216,7 +216,7 @@ struct IconBadge: View {
             
             Image(systemName: iconName)
                 .font(.system(size: 20, weight: .regular))
-                .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                .foregroundColor(Color.themeIconColor(for: colorScheme))
         }
         .frame(width: 40, height: 40)
     }
@@ -487,7 +487,7 @@ extension Color {
     }
     
     static func themeCardBg(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? Color(hex: "161b26") : Color(hex: "f5f5f5")
+        scheme == .dark ? Color(hex: "242933") : Color(hex: "f5f5f5")
     }
     
     static func themeBorder(for scheme: ColorScheme) -> Color {
@@ -499,19 +499,23 @@ extension Color {
     }
     
     static func themeIconBg(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? Color(hex: "101828") : Color(hex: "fdfdfd")
+        scheme == .dark ? .white : Color(hex: "fdfdfd")
+    }
+    
+    static func themeIconColor(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "181d27") : Color(hex: "181d27")
     }
     
     static func themeIconBorder(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? Color(hex: "344054") : Color(hex: "d5d7da")
+        scheme == .dark ? Color.clear : Color(hex: "d5d7da")
     }
     
     static func themeKeyBg(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? Color(hex: "1D2939") : .white
+        scheme == .dark ? Color(hex: "111419") : .white
     }
     
     static func themeOverlayTint(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? Color.black.opacity(0.2) : Color.white.opacity(0.2)
+        scheme == .dark ? Color.black.opacity(0.6) : Color.white.opacity(0.2)
     }
     
     static func themeSelectionRing(for scheme: ColorScheme) -> Color {
