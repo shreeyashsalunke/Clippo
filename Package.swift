@@ -22,7 +22,9 @@ let package = Package(
                 "SettingsView.swift",
                 "SettingsWindowController.swift",
                 "PasswordDetector.swift",
-                "IgnoredItemTooltip.swift"
+                "IgnoredItemTooltip.swift",
+                "MenuView.swift",
+                "StatusBarController.swift"
             ],
             resources: [
                 .copy("Resources")

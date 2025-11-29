@@ -25,7 +25,7 @@ enum AppAppearance: String, CaseIterable {
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindow: OverlayWindow!
     var hostingController: NSHostingController<ContentView>!
     var isPasting: Bool = false {
@@ -72,6 +72,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let appearance = currentAppearance.nsAppearance
         NSApp.appearance = appearance
         overlayWindow?.appearance = appearance
+        popover?.appearance = appearance
         
         // Force view update to pick up new appearance
         if hostingController != nil {
@@ -79,23 +80,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     
-    var statusItem: NSStatusItem!
-    
-    var isPasswordProtectionEnabled: Bool {
-        get {
-            // Default to true if not set
-            if !UserDefaults.standard.bool(forKey: "passwordProtectionConfigured") {
-                UserDefaults.standard.set(true, forKey: "passwordProtectionEnabled")
-                UserDefaults.standard.set(true, forKey: "passwordProtectionConfigured")
-                return true
-            }
-            return UserDefaults.standard.bool(forKey: "passwordProtectionEnabled")
-        }
-        set {
-            UserDefaults.standard.set(newValue, forKey: "passwordProtectionEnabled")
-            UserDefaults.standard.set(true, forKey: "passwordProtectionConfigured")
-        }
-    }
+    var statusBarController: StatusBarController?
+    var popover: NSPopover!
     
     // Helper to create menu icon with specific sizing
     func createMenuIcon(systemName: String, size: CGFloat = 20) -> NSImage? {
@@ -134,120 +120,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return event
         }
         
-        // Setup Status Item
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clippo")
-        }
+        // Setup Custom Menu Popover
+        let menuViewModel = MenuViewModel()
+        let menuView = MenuView(viewModel: menuViewModel)
         
-        let menu = NSMenu()
-        menu.delegate = self
+        popover = NSPopover()
+        popover.contentSize = NSSize(width: 260, height: 300) // Height will adjust dynamically but setting a base
+        popover.behavior = .transient
+        popover.contentViewController = NSHostingController(rootView: menuView)
+        // Make popover background transparent so VisualEffectView works
+        popover.contentViewController?.view.window?.backgroundColor = .clear
         
-        // Section 1
-        // Grant Permission (Tag: 1)
-        let grantItem = NSMenuItem(title: "Grant Paste Permission", action: #selector(openSystemSettings), keyEquivalent: "")
-        grantItem.tag = 1
-        grantItem.image = createMenuIcon(systemName: "lock.shield")
-        menu.addItem(grantItem)
-        
-        // How it works
-        let howToItem = NSMenuItem(title: "How it works", action: #selector(resetOnboarding), keyEquivalent: "")
-        howToItem.image = createMenuIcon(systemName: "info.circle")
-        menu.addItem(howToItem)
-        
-        menu.addItem(NSMenuItem.separator())
-        
-        // Section 2 - Settings Header
-        let settingsHeader = NSMenuItem()
-        let headerView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 22))
-        let headerLabel = NSTextField(labelWithString: "Settings")
-        headerLabel.font = .systemFont(ofSize: 11, weight: .semibold)
-        headerLabel.textColor = .tertiaryLabelColor
-        headerLabel.frame = NSRect(x: 12, y: 2, width: 180, height: 16)
-        headerView.addSubview(headerLabel)
-        settingsHeader.view = headerView
-        menu.addItem(settingsHeader)
-        
-        // Clear History
-        let clearItem = NSMenuItem(title: "Clear History", action: #selector(clearHistory), keyEquivalent: "")
-        clearItem.image = createMenuIcon(systemName: "trash")
-        menu.addItem(clearItem)
-        
-        // Appearance (Tag: 2)
-        let appearanceItem = NSMenuItem(title: "Dark Mode", action: #selector(toggleAppearance), keyEquivalent: "")
-        appearanceItem.tag = 2
-        appearanceItem.image = createMenuIcon(systemName: "moon")
-        menu.addItem(appearanceItem)
-        
-        // Change Hotkey (Tag: 3)
-        let hotkeyItem = NSMenuItem()
-        hotkeyItem.tag = 3
-        
-        // Use standard image for perfect alignment
-        if let icon = createMenuIcon(systemName: "keyboard", size: 15) {
-            hotkeyItem.image = icon
-        }
-        hotkeyItem.action = #selector(openSettings)
-        hotkeyItem.target = self
-        
-        // Use attributed string with tab stops for alignment
-        let shortcut = HotKeyManager.shared.shortcutString
-        let title = NSMutableAttributedString(string: "Change Hotkey\t\(shortcut)")
-        
-        // Create paragraph style with tab stop at the end
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.tabStops = [NSTextTab(textAlignment: .right, location: 230, options: [:])] // Adjust location as needed
-        
-        title.addAttributes([
-            .font: NSFont.menuFont(ofSize: 14),
-            .paragraphStyle: paragraphStyle,
-            .foregroundColor: NSColor.labelColor
-        ], range: NSRange(location: 0, length: title.length))
-        
-        // Style the shortcut part differently
-        let shortcutRange = (title.string as NSString).range(of: shortcut)
-        title.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: shortcutRange)
-        
-        hotkeyItem.attributedTitle = title
-        menu.addItem(hotkeyItem)
-        
-        // Password Protection (Tag: 4)
-        let passwordProtectionItem = NSMenuItem(title: "Ignore Sensitive Content", action: nil, keyEquivalent: "")
-        passwordProtectionItem.tag = 4
-        passwordProtectionItem.image = createMenuIcon(systemName: "eye.slash")
-        
-        // Create attributed title with "Experimental" subtext
-        let mainTitle = NSMutableAttributedString(string: "Ignore Sensitive Content")
-        mainTitle.addAttribute(.font, value: NSFont.systemFont(ofSize: 13), range: NSRange(location: 0, length: mainTitle.length))
-        
-        let experimental = NSAttributedString(
-            string: "\nExperimental",
-            attributes: [
-                .font: NSFont.systemFont(ofSize: 11),
-                .foregroundColor: NSColor.secondaryLabelColor
-            ]
-        )
-        mainTitle.append(experimental)
-        passwordProtectionItem.attributedTitle = mainTitle
-        
-        // Create submenu
-        let passwordSubmenu = NSMenu()
-        
-        let enableItem = NSMenuItem(title: "Enable", action: #selector(enablePasswordProtection), keyEquivalent: "")
-        enableItem.target = self
-        passwordSubmenu.addItem(enableItem)
-        
-        let disableItem = NSMenuItem(title: "Disable", action: #selector(disablePasswordProtection), keyEquivalent: "")
-        disableItem.target = self
-        passwordSubmenu.addItem(disableItem)
-        
-        passwordProtectionItem.submenu = passwordSubmenu
-        menu.addItem(passwordProtectionItem)
-        
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Clippo", action: #selector(quitApp), keyEquivalent: ""))
-        
-        statusItem.menu = menu
+        statusBarController = StatusBarController(popover, viewModel: menuViewModel)
         
         // Apply saved appearance
         applyAppearance()
@@ -290,16 +174,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     @objc func toggleAppearance() {
         currentAppearance = (currentAppearance == .light) ? .dark : .light
-    }
-    
-    @objc func enablePasswordProtection() {
-        isPasswordProtectionEnabled = true
-        print("Password protection: enabled")
-    }
-    
-    @objc func disablePasswordProtection() {
-        isPasswordProtectionEnabled = false
-        print("Password protection: disabled")
     }
     
     @objc func resetOnboarding() {
@@ -483,54 +357,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         vDown?.post(tap: .cghidEventTap)
         vUp?.post(tap: .cghidEventTap)
         cmdUp?.post(tap: .cghidEventTap)
-    }
-    
-    func menuNeedsUpdate(_ menu: NSMenu) {
-        if let grantItem = menu.item(withTag: 1) {
-            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String : false]
-            let trusted = AXIsProcessTrustedWithOptions(options)
-            grantItem.isHidden = trusted
-        }
-        
-        if let appearanceItem = menu.item(withTag: 2) {
-            let isLight = currentAppearance == .light
-            appearanceItem.title = isLight ? "Dark Mode" : "Light Mode"
-            appearanceItem.image = createMenuIcon(systemName: isLight ? "moon" : "sun.max")
-        }
-        
-        
-        // Update hotkey shortcut
-        if let hotkeyItem = menu.item(withTag: 3) {
-            let shortcut = HotKeyManager.shared.shortcutString
-            let title = NSMutableAttributedString(string: "Change Hotkey\t\(shortcut)")
-            
-            // Re-apply paragraph style for alignment
-            let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.tabStops = [NSTextTab(textAlignment: .right, location: 230, options: [:])]
-            
-            title.addAttributes([
-                .font: NSFont.menuFont(ofSize: 14),
-                .paragraphStyle: paragraphStyle,
-                .foregroundColor: NSColor.labelColor
-            ], range: NSRange(location: 0, length: title.length))
-            
-            let shortcutRange = (title.string as NSString).range(of: shortcut)
-            title.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: shortcutRange)
-            
-            hotkeyItem.attributedTitle = title
-        }
-        
-        // Update password protection submenu checkmarks
-        if let passwordItem = menu.item(withTag: 4),
-           let submenu = passwordItem.submenu {
-            for item in submenu.items {
-                if item.title == "Enable" {
-                    item.state = isPasswordProtectionEnabled ? .on : .off
-                } else if item.title == "Disable" {
-                    item.state = isPasswordProtectionEnabled ? .off : .on
-                }
-            }
-        }
     }
     
     @objc func openSystemSettings() {
