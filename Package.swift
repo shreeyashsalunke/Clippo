@@ -20,7 +20,9 @@ let package = Package(
                 "OnboardingWindowController.swift",
                 "OnboardingState.swift",
                 "SettingsView.swift",
-                "SettingsWindowController.swift"
+                "SettingsWindowController.swift",
+                "PasswordDetector.swift",
+                "IgnoredItemTooltip.swift"
             ],
             resources: [
                 .copy("Resources")

@@ -1,5 +1,6 @@
 import SwiftUI
 import Carbon
+import Combine
 
 @main
 struct ClippoApp: App {
@@ -38,6 +39,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // Onboarding
     var onboardingWindowController: OnboardingWindowController?
     var settingsWindowController: SettingsWindowController?
+    var tooltipWindowController: TooltipWindowController?
+    
+    private var cancellables = Set<AnyCancellable>()
     
     var isOnboardingComplete: Bool {
         UserDefaults.standard.bool(forKey: "onboardingComplete")
@@ -171,6 +175,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !isOnboardingComplete {
             showOnboarding()
         }
+        
+        // Observe clipboard ignored events
+        ClipboardManager.shared.$lastIgnoredReason
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] reason in
+                self?.showTooltip(message: reason)
+                // Reset after showing to prevent repeated triggers
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    ClipboardManager.shared.lastIgnoredReason = nil
+                }
+            }
+            .store(in: &cancellables)
     }
     
     func checkAccessibilityPermissions() {
@@ -206,6 +223,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             settingsWindowController = SettingsWindowController()
         }
         settingsWindowController?.show()
+    }
+    
+    func showTooltip(message: String) {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in
+                self?.showTooltip(message: message)
+            }
+            return
+        }
+        tooltipWindowController = TooltipWindowController(message: message)
+        tooltipWindowController?.show()
     }
     
     @objc func clearHistory() {
