@@ -16,40 +16,9 @@ class TooltipWindowController: NSWindowController {
         
         self.init(window: window)
         
-        // Use a simple NSView instead of NSHostingView to avoid Auto Layout issues
-        let containerView = NSView(frame: window.contentView!.bounds)
-        containerView.wantsLayer = true
-        
-        // Background with rounded corners
-        let backgroundLayer = CALayer()
-        backgroundLayer.frame = CGRect(x: 8, y: 8, width: 284, height: 44)
-        backgroundLayer.backgroundColor = NSColor.black.withAlphaComponent(0.85).cgColor
-        backgroundLayer.cornerRadius = 8
-        backgroundLayer.shadowColor = NSColor.black.cgColor
-        backgroundLayer.shadowOpacity = 0.3
-        backgroundLayer.shadowRadius = 8
-        backgroundLayer.shadowOffset = CGSize(width: 0, height: 4)
-        containerView.layer?.addSublayer(backgroundLayer)
-        
-        // Icon
-        let iconImageView = NSImageView(frame: CGRect(x: 24, y: 20, width: 20, height: 20))
-        iconImageView.image = NSImage(systemSymbolName: "lock.shield.fill", accessibilityDescription: nil)
-        iconImageView.contentTintColor = .white
-        containerView.addSubview(iconImageView)
-        
-        // Text
-        let textField = NSTextField(frame: CGRect(x: 56, y: 16, width: 220, height: 28))
-        textField.stringValue = message
-        textField.isEditable = false
-        textField.isBordered = false
-        textField.backgroundColor = .clear
-        textField.textColor = .white
-        textField.font = .systemFont(ofSize: 13)
-        textField.lineBreakMode = .byWordWrapping
-        textField.maximumNumberOfLines = 2
-        containerView.addSubview(textField)
-        
-        window.contentView = containerView
+        let tooltipView = TooltipView(message: message)
+        let hostingView = NSHostingView(rootView: tooltipView)
+        window.contentView = hostingView
         
         // Position near menu bar
         if let screen = NSScreen.main {
@@ -84,3 +53,28 @@ class TooltipWindowController: NSWindowController {
     }
 }
 
+struct TooltipView: View {
+    let message: String
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "lock.shield.fill")
+                .font(.system(size: 20))
+                .foregroundColor(.white)
+            
+            Text(message)
+                .font(.system(size: 13))
+                .foregroundColor(.white)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.black.opacity(0.85))
+                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+        )
+        .padding(8)
+    }
+}
