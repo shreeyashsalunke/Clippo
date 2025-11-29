@@ -1,7 +1,7 @@
 ##Plan
 1. Onboarding design changes - Done
 2. Reorder the menu list - Done
-3. Add password protection feature
+3. Add password protection feature - Done
 4. Change paste to release icon
 5. Fall back copy when accessiblity permission is not given
 6. File and Folder Copy

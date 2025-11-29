@@ -1,4 +1,5 @@
 import SwiftUI
+import ApplicationServices
 
 struct ContentView: View {
     @ObservedObject var clipboardManager = ClipboardManager.shared
@@ -347,11 +348,23 @@ struct PasteButton: View {
         themeManager.colorScheme
     }
     
+    var hasAccessibilityPermission: Bool {
+        AXIsProcessTrusted()
+    }
+    
     var body: some View {
         HStack(spacing: 6) {
-            Image(systemName: isPasting ? "checkmark" : "doc.on.clipboard")
-                .font(.system(size: 14, weight: .semibold))
-            Text(isPasting ? "Pasted!" : "Release to Paste")
+            if isPasting {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 14, weight: .semibold))
+            } else {
+                if let iconImage = NSImage(contentsOfFile: Bundle.main.path(forResource: hasAccessibilityPermission ? "icon-paste" : "icon-copy", ofType: "png") ?? "") {
+                    Image(nsImage: iconImage)
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                }
+            }
+            Text(isPasting ? (hasAccessibilityPermission ? "Pasted!" : "Copied!") : (hasAccessibilityPermission ? "Release to Paste" : "Release to Copy"))
                 .font(.custom("Inter", size: 14))
                 .fontWeight(.semibold)
                 .padding(.trailing, isPasting ? 8 : 0)
@@ -484,7 +497,7 @@ extension Color {
     }
     
     static func themeAccent(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? Color(hex: "9E77ED") : Color(hex: "7f56d9")
+        scheme == .dark ? Color(hex: "3D9AA8") : Color(hex: "27727F")
     }
     
     static func themeIconBg(for scheme: ColorScheme) -> Color {
@@ -504,6 +517,6 @@ extension Color {
     }
     
     static func themeSelectionRing(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? Color(hex: "B692F6") : Color(hex: "9e77ed")
+        scheme == .dark ? Color(hex: "5FB3C1") : Color(hex: "27727F")
     }
 }
