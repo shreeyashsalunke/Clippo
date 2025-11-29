@@ -90,7 +90,7 @@ struct KeyBadge: View {
         Text(text)
             .font(.custom("Inter", size: 14))
             .fontWeight(.semibold)
-            .foregroundColor(.themeTextSecondary(for: colorScheme))
+            .foregroundColor(colorScheme == .dark ? .white : .themeTextSecondary(for: colorScheme))
             .padding(.horizontal, 6)
             .padding(.vertical, 4)
             .background(Color.themeKeyBg(for: colorScheme))
@@ -442,7 +442,7 @@ struct InstructionTextModifier: View {
         text
             .font(.custom("Inter", size: 14))
             .fontWeight(.semibold)
-            .foregroundColor(.themeTextSecondary(for: colorScheme))
+            .foregroundColor(colorScheme == .dark ? .white : .themeTextSecondary(for: colorScheme))
     }
 }
 
