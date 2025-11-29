@@ -56,25 +56,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var currentAppearance: AppAppearance {
         get {
-            if let rawValue = UserDefaults.standard.string(forKey: "appAppearance"),
-               let appearance = AppAppearance(rawValue: rawValue) {
-                return appearance
-            }
-            return .light
+            return ThemeManager.shared.isDarkMode ? .dark : .light
         }
         set {
-            UserDefaults.standard.set(newValue.rawValue, forKey: "appAppearance")
-            applyAppearance()
+            ThemeManager.shared.isDarkMode = (newValue == .dark)
         }
     }
     
     func applyAppearance() {
-        let appearance = currentAppearance.nsAppearance
-        NSApp.appearance = appearance
-        overlayWindow?.appearance = appearance
-        popover?.appearance = appearance
-        
-        // Force view update to pick up new appearance
+        // Force view update to pick up new appearance from ThemeManager
         if hostingController != nil {
             updateView()
         }
@@ -132,9 +122,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentViewController?.view.window?.backgroundColor = .clear
         
         statusBarController = StatusBarController(popover, viewModel: menuViewModel)
-        
-        // Apply saved appearance
-        applyAppearance()
         
         // Show onboarding if first launch
         if !isOnboardingComplete {

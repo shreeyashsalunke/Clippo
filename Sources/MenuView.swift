@@ -59,7 +59,7 @@ struct MenuView: View {
             
             // Privacy Toggle
             ToggleMenuButton(
-                title: "Ignore Sensitive Content",
+                title: "Ignore Passwords",
                 subtitle: "Experimental",
                 icon: "eye.slash",
                 isOn: $viewModel.isPasswordProtectionEnabled
@@ -195,11 +195,17 @@ class MenuViewModel: ObservableObject {
     
     init() {
         self.isPasswordProtectionEnabled = UserDefaults.standard.bool(forKey: "passwordProtectionEnabled")
-        // Initialize dark mode state based on current appearance
-        if let rawValue = UserDefaults.standard.string(forKey: "appAppearance"),
-           let appearance = AppAppearance(rawValue: rawValue) {
-            self.isDarkMode = appearance == .dark
-        }
+        
+        // Sync with ThemeManager
+        self.isDarkMode = ThemeManager.shared.isDarkMode
+        
+        // Observe ThemeManager changes
+        ThemeManager.shared.$isDarkMode
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.isDarkMode = newValue
+            }
+            .store(in: &cancellables)
         
         // Observe HotKey changes
         HotKeyManager.shared.$shortcutString
@@ -258,13 +264,7 @@ class MenuViewModel: ObservableObject {
     }
     
     func toggleAppearance() {
-        isDarkMode.toggle()
-        let appearance: AppAppearance = isDarkMode ? .dark : .light
-        UserDefaults.standard.set(appearance.rawValue, forKey: "appAppearance")
-        
-        if let appDelegate = NSApp.delegate as? AppDelegate {
-            appDelegate.applyAppearance()
-        }
+        ThemeManager.shared.toggle()
     }
     
     func openSettings() {

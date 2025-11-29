@@ -38,10 +38,7 @@ class StatusBarController {
         if let button = statusItem.button {
             // Update view model state before showing
             // This ensures dark mode toggle reflects current state if changed elsewhere
-            if let rawValue = UserDefaults.standard.string(forKey: "appAppearance"),
-               let appearance = AppAppearance(rawValue: rawValue) {
-                menuViewModel.isDarkMode = appearance == .dark
-            }
+            menuViewModel.isDarkMode = ThemeManager.shared.isDarkMode
             
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
             

@@ -4,7 +4,11 @@ struct ContentView: View {
     @ObservedObject var clipboardManager = ClipboardManager.shared
     @Binding var selectionIndex: Int
     @Binding var isPasting: Bool
-    @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var colorScheme: ColorScheme {
+        themeManager.colorScheme
+    }
     
     var body: some View {
         VStack(spacing: 24) {
@@ -75,7 +79,11 @@ struct ContentView: View {
 
 struct KeyBadge: View {
     let text: String
-    @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var colorScheme: ColorScheme {
+        themeManager.colorScheme
+    }
     
     var body: some View {
         Text(text)
@@ -112,7 +120,11 @@ struct ClipboardCard: View {
     let isSelected: Bool
     let showPasteButton: Bool
     let isPasting: Bool
-    @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var colorScheme: ColorScheme {
+        themeManager.colorScheme
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -185,7 +197,11 @@ struct ClipboardCard: View {
 
 struct IconBadge: View {
     let type: ClipboardItemType
-    @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var colorScheme: ColorScheme {
+        themeManager.colorScheme
+    }
     
     var body: some View {
         ZStack {
@@ -220,7 +236,11 @@ struct IconBadge: View {
 
 struct ContentPreview: View {
     let item: ClipboardItem
-    @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var colorScheme: ColorScheme {
+        themeManager.colorScheme
+    }
     
     var body: some View {
         ZStack {
@@ -269,7 +289,11 @@ struct ContentPreview: View {
 
 struct SyntaxHighlightedText: View {
     let code: String
-    @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var colorScheme: ColorScheme {
+        themeManager.colorScheme
+    }
     
     var body: some View {
         Text(highlightedCode())
@@ -317,7 +341,11 @@ struct SyntaxHighlightedText: View {
 
 struct PasteButton: View {
     var isPasting: Bool
-    @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var colorScheme: ColorScheme {
+        themeManager.colorScheme
+    }
     
     var body: some View {
         HStack(spacing: 6) {
@@ -393,7 +421,11 @@ extension Text {
 
 struct InstructionTextModifier: View {
     let text: Text
-    @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var colorScheme: ColorScheme {
+        themeManager.colorScheme
+    }
     
     var body: some View {
         text

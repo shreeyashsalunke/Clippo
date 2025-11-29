@@ -24,7 +24,8 @@ let package = Package(
                 "PasswordDetector.swift",
                 "IgnoredItemTooltip.swift",
                 "MenuView.swift",
-                "StatusBarController.swift"
+                "StatusBarController.swift",
+                "ThemeManager.swift"
             ],
             resources: [
                 .copy("Resources")
