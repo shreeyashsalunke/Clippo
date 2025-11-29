@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import ApplicationServices
 
 struct MenuView: View {
     @ObservedObject var viewModel: MenuViewModel
@@ -12,6 +13,15 @@ struct MenuView: View {
                 icon: "info.circle",
                 action: viewModel.openOnboarding
             )
+            
+            if !viewModel.hasAccessibilityPermission {
+                MenuButton(
+                    title: "Grant Paste Permission",
+                    icon: "lock.shield",
+                    action: viewModel.openSystemSettings
+                )
+                .foregroundColor(.red)
+            }
             
             Divider()
                 .padding(.vertical, 4)
@@ -184,6 +194,7 @@ struct ToggleMenuButton: View {
 
 class MenuViewModel: ObservableObject {
     @Published var isDarkMode: Bool = false
+    @Published var hasAccessibilityPermission: Bool = false
     @Published var isPasswordProtectionEnabled: Bool {
         didSet {
             UserDefaults.standard.set(isPasswordProtectionEnabled, forKey: "passwordProtectionEnabled")
@@ -198,6 +209,9 @@ class MenuViewModel: ObservableObject {
         
         // Sync with ThemeManager
         self.isDarkMode = ThemeManager.shared.isDarkMode
+        
+        // Check permissions initially
+        checkAccessibilityPermission()
         
         // Observe ThemeManager changes
         ThemeManager.shared.$isDarkMode
@@ -216,6 +230,15 @@ class MenuViewModel: ObservableObject {
             .store(in: &cancellables)
         
         updateShortcutParts(using: HotKeyManager.shared.shortcutString)
+    }
+    
+    func checkAccessibilityPermission() {
+        self.hasAccessibilityPermission = AXIsProcessTrusted()
+    }
+    
+    func openSystemSettings() {
+        NSApp.sendAction(#selector(AppDelegate.openSystemSettings), to: nil, from: nil)
+        closePopover()
     }
     
     private func updateShortcutParts(using raw: String) {

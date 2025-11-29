@@ -162,7 +162,7 @@ struct ClipboardCard: View {
                         .stroke(Color.themeKeyBg(for: colorScheme), lineWidth: 2)
                         .padding(-2)
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(isPasting ? Color.green : .themeSelectionRing(for: colorScheme), lineWidth: 4)
+                        .stroke(Color.themeSelectionRing(for: colorScheme), lineWidth: 4)
                         .padding(-6)
                 }
             }
@@ -371,12 +371,10 @@ struct PasteButton: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(isPasting ? Color.green : .themeAccent(for: colorScheme))
+        .background(Color.themeAccent(for: colorScheme))
         .foregroundColor(.white)
         .cornerRadius(8)
         .shadow(color: Color.themeAccent(for: colorScheme).opacity(0.24), radius: 8, x: 0, y: 4)
-        .scaleEffect(isPasting ? 1.1 : 1.0)
-        .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isPasting)
     }
 }
 

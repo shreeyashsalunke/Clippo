@@ -39,6 +39,7 @@ class StatusBarController {
             // Update view model state before showing
             // This ensures dark mode toggle reflects current state if changed elsewhere
             menuViewModel.isDarkMode = ThemeManager.shared.isDarkMode
+            menuViewModel.checkAccessibilityPermission()
             
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
             
