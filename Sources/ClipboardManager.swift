@@ -165,7 +165,7 @@ class ClipboardManager: ObservableObject {
             history.insert(existingItem, at: 0)
             
             #if DEBUG
-            print("Moved existing item to top: \(item.type)")
+            print("Moved existing item to top: \(type)")
             #endif
         } else {
             // New unique item, add it
