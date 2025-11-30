@@ -1,0 +1,58 @@
+Clippo v1.0.0 - Distribution Package
+=========================================
+
+CONTENTS:
+- Clippo-1.0.0.dmg - macOS Disk Image (recommended)
+- Clippo-1.0.0.zip - ZIP Archive (alternative)
+- SHA256 checksums for verification
+
+DISTRIBUTION METHODS:
+
+1. DMG (Recommended):
+   - Users can drag Clippo.app to Applications
+   - Includes README and Applications shortcut
+   - Standard macOS distribution format
+
+2. ZIP:
+   - Extract and copy Clippo.app to Applications
+   - Simpler for some users
+
+IMPORTANT NOTES:
+
+⚠️  CODE SIGNING:
+This build is NOT code-signed. Users will see:
+"Clippo cannot be opened because the developer cannot be verified"
+
+WORKAROUND FOR USERS:
+1. Right-click on Clippo.app
+2. Select "Open"
+3. Click "Open" in the dialog
+4. macOS will remember this choice
+
+OR users can run in Terminal:
+  xattr -cr /Applications/Clippo.app
+
+TO ADD CODE SIGNING (requires Apple Developer account):
+1. Get Developer ID certificate from Apple
+2. Run: codesign --deep --force --verify --verbose \
+        --sign "Developer ID Application: Your Name" \
+        Clippo.app
+3. Notarize with Apple (required for macOS 10.15+)
+
+DISTRIBUTION CHANNELS:
+- GitHub Releases (attach DMG and ZIP)
+- Direct download from website
+- Email to beta testers
+
+REQUIREMENTS:
+- macOS 12.0 or later
+- Accessibility permission (for auto-paste)
+
+BUILD DATE: Sun Nov 30 08:55:48 IST 2025
+BUNDLE ID: com.clippo.macos
+VERSION: 1.0.0
+
+CHECKSUMS:
+
+
+
