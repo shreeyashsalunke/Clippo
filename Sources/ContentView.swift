@@ -132,7 +132,7 @@ struct ClipboardCard: View {
             // Card Header
             HStack(spacing: 12) {
                 // Icon Badge
-                IconBadge(type: item.type)
+                IconBadge(item: item)
                 
                 // Type Label
                 Text(typeLabel)
@@ -194,6 +194,12 @@ struct ClipboardCard: View {
             return "Image"
         case .file:
             return "File"
+        case .folder:
+            return "Folder"
+        case .files:
+            return "Multiple Files"
+        case .folders:
+            return "Multiple Folders"
         case .other:
             return "Data"
         }
@@ -201,7 +207,7 @@ struct ClipboardCard: View {
 }
 
 struct IconBadge: View {
-    let type: ClipboardItemType
+    let item: ClipboardItem
     @ObservedObject var themeManager = ThemeManager.shared
     
     var colorScheme: ColorScheme {
@@ -218,15 +224,25 @@ struct IconBadge: View {
                 )
                 .shadow(color: Color.black.opacity(0.05), radius: 0, x: 0, y: -2)
             
-            Image(systemName: iconName)
-                .font(.system(size: 20, weight: .regular))
-                .foregroundColor(Color.themeIconColor(for: colorScheme))
+            if item.type == .other,
+               let bundleID = item.sourceAppBundleID,
+               let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+                Image(nsImage: NSWorkspace.shared.icon(forFile: appURL.path))
+                    .resizable()
+                    .saturation(0) // Greyed out
+                    .opacity(0.6)
+                    .frame(width: 24, height: 24)
+            } else {
+                Image(systemName: iconName)
+                    .font(.system(size: 20, weight: .regular))
+                    .foregroundColor(Color.themeIconColor(for: colorScheme))
+            }
         }
         .frame(width: 40, height: 40)
     }
     
     var iconName: String {
-        switch type {
+        switch item.type {
         case .text:
             return "textformat"
         case .code:
@@ -236,9 +252,15 @@ struct IconBadge: View {
         case .image:
             return "photo"
         case .file:
+            return "doc"
+        case .folder:
             return "folder"
+        case .files:
+            return "doc.on.doc"
+        case .folders:
+            return "folder.badge.plus"
         case .other:
-            return "doc.on.clipboard"
+            return "cube.box"
         }
     }
 }
@@ -295,16 +317,66 @@ struct ContentPreview: View {
                         .multilineTextAlignment(.center)
                 }
                 .padding(16)
-            } else if item.type == .other {
-                // Generic data preview
+            } else if item.type == .folder {
+                // Folder preview
                 VStack(spacing: 8) {
-                    Image(systemName: "cube.box.fill")
+                    Image(systemName: "folder.fill")
                         .font(.system(size: 48))
                         .foregroundColor(Color.themeIconColor(for: colorScheme))
+                    Text(item.content)
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.medium)
+                        .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(16)
+            } else if item.type == .files {
+                // Multiple Files preview
+                VStack(spacing: 8) {
+                    Image(systemName: "doc.on.doc.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(Color.themeIconColor(for: colorScheme))
+                    Text(item.content)
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.medium)
+                        .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                }
+                .padding(16)
+            } else if item.type == .folders {
+                // Multiple Folders preview
+                VStack(spacing: 8) {
+                    Image(systemName: "square.grid.3x1.folder.fill.badge.plus") // Or just multiple folders
+                        .font(.system(size: 48))
+                        .foregroundColor(Color.themeIconColor(for: colorScheme))
+                    Text(item.content)
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.medium)
+                        .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                }
+                .padding(16)
+            } else if item.type == .other {
+                // Generic data preview
+                VStack(spacing: 12) {
+                    // Show App Icon if available
+                    if let bundleID = item.sourceAppBundleID,
+                       let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+                        Image(nsImage: NSWorkspace.shared.icon(forFile: appURL.path))
+                            .resizable()
+                            .saturation(0) // Greyed out
+                            .opacity(0.6)
+                            .frame(width: 64, height: 64)
+                    } else {
+                        Image(systemName: "cube.box.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(Color.themeIconColor(for: colorScheme))
+                    }
+                    
                     Text("Binary Data")
                         .font(.custom("Inter", size: 14))
                         .fontWeight(.medium)
                         .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                    
                     if let count = item.representations?.count {
                         Text("\(count) types")
                             .font(.custom("Inter", size: 12))

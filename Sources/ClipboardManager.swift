@@ -41,18 +41,38 @@ class ClipboardManager: ObservableObject {
                 }
             }
             
-            // Check for Image
-            if let data = pasteboard.data(forType: .tiff) {
-                handleNewClipboardItem(content: "Image", imageData: data, fileURL: nil, representations: nil, type: .image, format: .tiff)
-            } else if let data = pasteboard.data(forType: .png) {
-                handleNewClipboardItem(content: "Image", imageData: data, fileURL: nil, representations: nil, type: .image, format: .png)
-            }
-            // Check for Files
-            else if let fileURLs = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL], !fileURLs.isEmpty {
-                // Handle first file for now
-                if let firstFile = fileURLs.first {
-                    handleNewClipboardItem(content: firstFile.lastPathComponent, imageData: nil, fileURL: firstFile, representations: nil, type: .file, format: .fileURL)
+            // Check for Files/Folders FIRST (before images, because Finder provides both icon image and file URL)
+            if let fileURLs = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL], !fileURLs.isEmpty {
+                if fileURLs.count == 1 {
+                    let url = fileURLs[0]
+                    var isDir: ObjCBool = false
+                    FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+                    
+                    if isDir.boolValue {
+                        handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: nil, type: .folder, format: .fileURL)
+                    } else {
+                        handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: nil, type: .file, format: .fileURL)
+                    }
+                } else {
+                    // Multiple items
+                    let allFolders = fileURLs.allSatisfy { url in
+                        var isDir: ObjCBool = false
+                        FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+                        return isDir.boolValue
+                    }
+                    
+                    if allFolders {
+                        handleNewClipboardItem(content: "\(fileURLs.count) Folders", imageData: nil, fileURLs: fileURLs, representations: nil, type: .folders, format: .fileURL)
+                    } else {
+                        handleNewClipboardItem(content: "\(fileURLs.count) Files", imageData: nil, fileURLs: fileURLs, representations: nil, type: .files, format: .fileURL)
+                    }
                 }
+            }
+            // Check for Image
+            else if let data = pasteboard.data(forType: .tiff) {
+                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: nil, type: .image, format: .tiff)
+            } else if let data = pasteboard.data(forType: .png) {
+                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: nil, type: .image, format: .png)
             }
             // Check for Text
             else if let str = pasteboard.string(forType: .string) {
@@ -64,7 +84,7 @@ class ClipboardManager: ObservableObject {
                 }
                 
                 let detectedType = detectTextType(str)
-                handleNewClipboardItem(content: str, imageData: nil, fileURL: nil, representations: nil, type: detectedType, format: .string)
+                handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: nil, type: detectedType, format: .string)
             }
             // Fallback: Capture everything else
             else {
@@ -76,7 +96,8 @@ class ClipboardManager: ObservableObject {
                 }
                 
                 if !reps.isEmpty {
-                    handleNewClipboardItem(content: "Data", imageData: nil, fileURL: nil, representations: reps, type: .other, format: .string) // Format is placeholder
+                    let sourceApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+                    handleNewClipboardItem(content: "Data", imageData: nil, fileURLs: nil, representations: reps, sourceAppBundleID: sourceApp, type: .other, format: .string)
                 }
             }
         }
@@ -115,7 +136,7 @@ class ClipboardManager: ObservableObject {
         return indicatorCount >= 2 ? .code : .text
     }
     
-    private func handleNewClipboardItem(content: String, imageData: Data?, fileURL: URL?, representations: [NSPasteboard.PasteboardType: Data]?, type: ClipboardItemType, format: NSPasteboard.PasteboardType) {
+    private func handleNewClipboardItem(content: String, imageData: Data?, fileURLs: [URL]?, representations: [NSPasteboard.PasteboardType: Data]?, sourceAppBundleID: String? = nil, type: ClipboardItemType, format: NSPasteboard.PasteboardType) {
         // Check if this exact item already exists in history
         if let existingIndex = history.firstIndex(where: { item in
             if type == .text || type == .code || type == .url {
@@ -124,9 +145,9 @@ class ClipboardManager: ObservableObject {
             } else if type == .image, let newData = imageData, let existingData = item.imageData {
                 // For images, compare data
                 return item.type == .image && existingData == newData
-            } else if type == .file, let newURL = fileURL, let existingURL = item.fileURL {
-                // For files, compare URL
-                return item.type == .file && existingURL == newURL
+            } else if (type == .file || type == .folder || type == .files || type == .folders), let newURLs = fileURLs, let existingURLs = item.fileURLs {
+                // For files/folders, compare URLs
+                return item.type == type && existingURLs == newURLs
             } else if type == .other, let newReps = representations, let existingReps = item.representations {
                 // For other, compare representations count and keys (simplified check)
                 return item.type == .other && newReps.keys == existingReps.keys && newReps.count == existingReps.count
@@ -139,7 +160,7 @@ class ClipboardManager: ObservableObject {
             print("Moved existing item to top: \(content.prefix(20))...")
         } else {
             // New unique item, add it
-            let newItem = ClipboardItem(content: content, imageData: imageData, fileURL: fileURL, representations: representations, type: type, format: format)
+            let newItem = ClipboardItem(content: content, imageData: imageData, fileURLs: fileURLs, representations: representations, sourceAppBundleID: sourceAppBundleID, type: type, format: format)
             history.insert(newItem, at: 0)
             print("Clipboard captured: \(content.prefix(20))...")
             
@@ -157,6 +178,9 @@ enum ClipboardItemType {
     case url
     case image
     case file
+    case folder
+    case files // Multiple files
+    case folders // Multiple folders
     case other
 }
 
@@ -164,8 +188,9 @@ struct ClipboardItem: Identifiable, Equatable {
     let id = UUID()
     let content: String
     let imageData: Data?
-    let fileURL: URL?
+    let fileURLs: [URL]?
     let representations: [NSPasteboard.PasteboardType: Data]?
+    let sourceAppBundleID: String?
     let type: ClipboardItemType
     let format: NSPasteboard.PasteboardType
     let date = Date()
