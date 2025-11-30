@@ -7,4 +7,4 @@
 6. File and Folder Copy
 7. App logo update
 8. Export and test app
-9. Launch on App Store
+9. Launch on App Store - done
