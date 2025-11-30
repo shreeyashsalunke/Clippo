@@ -302,6 +302,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         if item.type == .image, let data = item.imageData {
             pasteboard.setData(data, forType: item.format)
+        } else if item.type == .file, let url = item.fileURL {
+            pasteboard.writeObjects([url as NSPasteboardWriting])
+        } else if item.type == .other, let reps = item.representations {
+            for (type, data) in reps {
+                pasteboard.setData(data, forType: type)
+            }
         } else {
             pasteboard.setString(item.content, forType: .string)
         }

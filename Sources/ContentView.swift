@@ -192,6 +192,10 @@ struct ClipboardCard: View {
             return "URL"
         case .image:
             return "Image"
+        case .file:
+            return "File"
+        case .other:
+            return "Data"
         }
     }
 }
@@ -231,6 +235,10 @@ struct IconBadge: View {
             return "link"
         case .image:
             return "photo"
+        case .file:
+            return "folder"
+        case .other:
+            return "doc.on.clipboard"
         }
     }
 }
@@ -273,6 +281,37 @@ struct ContentPreview: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(16)
+            } else if item.type == .file {
+                // File preview
+                VStack(spacing: 8) {
+                    Image(systemName: "doc.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(Color.themeIconColor(for: colorScheme))
+                    Text(item.content)
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.medium)
+                        .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(16)
+            } else if item.type == .other {
+                // Generic data preview
+                VStack(spacing: 8) {
+                    Image(systemName: "cube.box.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(Color.themeIconColor(for: colorScheme))
+                    Text("Binary Data")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.medium)
+                        .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                    if let count = item.representations?.count {
+                        Text("\(count) types")
+                            .font(.custom("Inter", size: 12))
+                            .foregroundColor(Color.themeTextSecondary(for: colorScheme))
+                    }
+                }
+                .padding(16)
             } else {
                 // Regular text
                 Text(item.content)
