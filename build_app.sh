@@ -69,7 +69,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <key>CFBundleExecutable</key>
     <string>$APP_NAME</string>
     <key>CFBundleIdentifier</key>
-    <string>com.yourname.$APP_NAME</string>
+    <string>com.clippo.macos</string>
     <key>CFBundleName</key>
     <string>$APP_NAME</string>
     <key>CFBundleIconFile</key>
@@ -86,6 +86,12 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <true/>
     <key>LSUIElement</key>
     <true/>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Clippo needs access to simulate paste operations to automatically paste clipboard content into other applications.</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>
 EOF

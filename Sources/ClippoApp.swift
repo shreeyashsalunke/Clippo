@@ -193,6 +193,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func quitApp() {
+        // Security: Clear clipboard history before quitting
+        ClipboardManager.shared.history.removeAll()
         NSApp.terminate(nil)
     }
     

@@ -16,6 +16,12 @@ class ClipboardManager: ObservableObject {
         startMonitoring()
     }
     
+    deinit {
+        // Security: Clear clipboard history when manager is deallocated
+        history.removeAll()
+        timer?.invalidate()
+    }
+    
     func startMonitoring() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.checkForChanges()
@@ -157,12 +163,19 @@ class ClipboardManager: ObservableObject {
             // Item already exists, move it to the top
             let existingItem = history.remove(at: existingIndex)
             history.insert(existingItem, at: 0)
-            print("Moved existing item to top: \(content.prefix(20))...")
+            
+            #if DEBUG
+            print("Moved existing item to top: \(item.type)")
+            #endif
         } else {
             // New unique item, add it
             let newItem = ClipboardItem(content: content, imageData: imageData, fileURLs: fileURLs, representations: representations, sourceAppBundleID: sourceAppBundleID, type: type, format: format)
             history.insert(newItem, at: 0)
-            print("Clipboard captured: \(content.prefix(20))...")
+            
+            // Security: Only log type and length, not actual content
+            #if DEBUG
+            print("Clipboard captured: \(type) (length: \(content.count))")
+            #endif
             
             // Limit history size to 5 items
             if history.count > 5 {
