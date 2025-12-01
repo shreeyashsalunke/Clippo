@@ -298,34 +298,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let item = history[selectionIndex]
         
-        // 2. Put it on pasteboard
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        
-        // Always prioritize writing full representations if available to ensure high fidelity
-        if let reps = item.representations, !reps.isEmpty {
-            for (type, data) in reps {
-                pasteboard.setData(data, forType: type)
+        // 2. Perform heavy pasteboard operations on background queue to prevent UI hang
+        DispatchQueue.global(qos: .userInitiated).async {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            
+            // Always prioritize writing full representations if available to ensure high fidelity
+            if let reps = item.representations, !reps.isEmpty {
+                for (type, data) in reps {
+                    pasteboard.setData(data, forType: type)
+                }
+            } else if item.type == .image, let data = item.imageData {
+                pasteboard.setData(data, forType: item.format)
+            } else if (item.type == .file || item.type == .folder || item.type == .files || item.type == .folders), let urls = item.fileURLs {
+                pasteboard.writeObjects(urls as [NSPasteboardWriting])
+            } else {
+                pasteboard.setString(item.content, forType: .string)
             }
-        } else if item.type == .image, let data = item.imageData {
-            pasteboard.setData(data, forType: item.format)
-        } else if (item.type == .file || item.type == .folder || item.type == .files || item.type == .folders), let urls = item.fileURLs {
-            pasteboard.writeObjects(urls as [NSPasteboardWriting])
-        } else {
-            pasteboard.setString(item.content, forType: .string)
-        }
-        
-        // 3. Hide window
-        overlayWindow.orderOut(nil)
-        NSApp.hide(nil) // Return focus to previous app
-        
-        // 4. Simulate Cmd+V if we have permission
-        if AXIsProcessTrusted() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                self.simulatePaste()
+            
+            // 3. Dispatch back to main for UI updates and paste simulation
+            DispatchQueue.main.async {
+                // Hide window
+                self.overlayWindow.orderOut(nil)
+                NSApp.hide(nil) // Return focus to previous app
+                
+                // 4. Simulate Cmd+V if we have permission
+                if AXIsProcessTrusted() {
+                    // Reduced delay for snappier feel
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.simulatePaste()
+                    }
+                } else {
+                    print("Accessibility permission missing. Item copied to clipboard but not pasted.")
+                }
             }
-        } else {
-            print("Accessibility permission missing. Item copied to clipboard but not pasted.")
         }
     }
     
