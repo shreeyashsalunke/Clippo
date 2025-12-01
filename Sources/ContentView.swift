@@ -382,24 +382,21 @@ struct ContentPreview: View {
                             .foregroundColor(Color.themeIconColor(for: colorScheme))
                     }
                     
+                    Text("Rich Content")
+                        .font(.custom("Inter", size: 14))
+                        .fontWeight(.medium)
+                        .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                    
                     if item.content != "Data" && !item.content.isEmpty {
-                         Text(item.content)
-                            .font(.custom("Inter", size: 14))
-                            .fontWeight(.regular)
-                            .foregroundColor(Color.themeTextPrimary(for: colorScheme))
-                            .lineLimit(6)
-                            .multilineTextAlignment(.center)
-                    } else {
-                        Text("Binary Data")
-                            .font(.custom("Inter", size: 14))
-                            .fontWeight(.medium)
-                            .foregroundColor(Color.themeTextPrimary(for: colorScheme))
-                        
-                        if let count = item.representations?.count {
-                            Text("\(count) types")
-                                .font(.custom("Inter", size: 12))
-                                .foregroundColor(Color.themeTextSecondary(for: colorScheme))
-                        }
+                        Text(item.content)
+                            .font(.custom("Inter", size: 12))
+                            .foregroundColor(Color.themeTextSecondary(for: colorScheme))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    } else if let count = item.representations?.count {
+                        Text("\(count) types")
+                            .font(.custom("Inter", size: 12))
+                            .foregroundColor(Color.themeTextSecondary(for: colorScheme))
                     }
                 }
                 .padding(16)
