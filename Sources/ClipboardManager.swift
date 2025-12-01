@@ -47,7 +47,21 @@ class ClipboardManager: ObservableObject {
                 }
             }
             
-            // Check for Files/Folders FIRST (before images, because Finder provides both icon image and file URL)
+            // 1. Capture ALL representations to ensure high-fidelity paste
+            var allRepresentations: [NSPasteboard.PasteboardType: Data] = [:]
+            if let types = pasteboard.types {
+                for type in types {
+                    if let data = pasteboard.data(forType: type) {
+                        allRepresentations[type] = data
+                    }
+                }
+            }
+            
+            let sourceApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+            
+            // 2. Determine UI Type and Content
+            
+            // Check for Files/Folders FIRST
             if let fileURLs = (pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL])?.filter({ $0.isFileURL }), !fileURLs.isEmpty {
                 if fileURLs.count == 1 {
                     let url = fileURLs[0]
@@ -55,9 +69,9 @@ class ClipboardManager: ObservableObject {
                     FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
                     
                     if isDir.boolValue {
-                        handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: nil, type: .folder, format: .fileURL)
+                        handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: allRepresentations, sourceAppBundleID: sourceApp, type: .folder, format: .fileURL)
                     } else {
-                        handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: nil, type: .file, format: .fileURL)
+                        handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: allRepresentations, sourceAppBundleID: sourceApp, type: .file, format: .fileURL)
                     }
                 } else {
                     // Multiple items
@@ -68,17 +82,17 @@ class ClipboardManager: ObservableObject {
                     }
                     
                     if allFolders {
-                        handleNewClipboardItem(content: "\(fileURLs.count) Folders", imageData: nil, fileURLs: fileURLs, representations: nil, type: .folders, format: .fileURL)
+                        handleNewClipboardItem(content: "\(fileURLs.count) Folders", imageData: nil, fileURLs: fileURLs, representations: allRepresentations, sourceAppBundleID: sourceApp, type: .folders, format: .fileURL)
                     } else {
-                        handleNewClipboardItem(content: "\(fileURLs.count) Files", imageData: nil, fileURLs: fileURLs, representations: nil, type: .files, format: .fileURL)
+                        handleNewClipboardItem(content: "\(fileURLs.count) Files", imageData: nil, fileURLs: fileURLs, representations: allRepresentations, sourceAppBundleID: sourceApp, type: .files, format: .fileURL)
                     }
                 }
             }
             // Check for Image
             else if let data = pasteboard.data(forType: .tiff) {
-                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: nil, type: .image, format: .tiff)
+                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: allRepresentations, sourceAppBundleID: sourceApp, type: .image, format: .tiff)
             } else if let data = pasteboard.data(forType: .png) {
-                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: nil, type: .image, format: .png)
+                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: allRepresentations, sourceAppBundleID: sourceApp, type: .image, format: .png)
             }
             // Check for Text
             else if let str = pasteboard.string(forType: .string) {
@@ -89,21 +103,24 @@ class ClipboardManager: ObservableObject {
                     return
                 }
                 
-                let detectedType = detectTextType(str)
-                handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: nil, type: detectedType, format: .string)
+                // Check if it has rich data (more than just text/string types)
+                // Common text types: public.utf8-plain-text, NSStringPboardType, public.text
+                let textTypes: Set<String> = ["public.utf8-plain-text", "NSStringPboardType", "public.text"]
+                let hasRichData = allRepresentations.keys.contains { !textTypes.contains($0.rawValue) }
+                
+                if hasRichData {
+                     // It's text but has other data (e.g. HTML, RTF, Figma data), so treat as .other (Rich Data)
+                     handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: allRepresentations, sourceAppBundleID: sourceApp, type: .other, format: .string)
+                } else {
+                    // Pure text
+                    let detectedType = detectTextType(str)
+                    handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: allRepresentations, sourceAppBundleID: sourceApp, type: detectedType, format: .string)
+                }
             }
             // Fallback: Capture everything else
             else {
-                var reps: [NSPasteboard.PasteboardType: Data] = [:]
-                for type in pasteboard.types ?? [] {
-                    if let data = pasteboard.data(forType: type) {
-                        reps[type] = data
-                    }
-                }
-                
-                if !reps.isEmpty {
-                    let sourceApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-                    handleNewClipboardItem(content: "Data", imageData: nil, fileURLs: nil, representations: reps, sourceAppBundleID: sourceApp, type: .other, format: .string)
+                if !allRepresentations.isEmpty {
+                    handleNewClipboardItem(content: "Data", imageData: nil, fileURLs: nil, representations: allRepresentations, sourceAppBundleID: sourceApp, type: .other, format: .string)
                 }
             }
         }
@@ -155,8 +172,8 @@ class ClipboardManager: ObservableObject {
                 // For files/folders, compare URLs
                 return item.type == type && existingURLs == newURLs
             } else if type == .other, let newReps = representations, let existingReps = item.representations {
-                // For other, compare representations count and keys (simplified check)
-                return item.type == .other && newReps.keys == existingReps.keys && newReps.count == existingReps.count
+                // For other, compare actual data to ensure we don't ignore different items with same types (e.g. different Figma layers)
+                return item.type == .other && newReps == existingReps
             }
             return false
         }) {

@@ -201,6 +201,16 @@ struct ClipboardCard: View {
         case .folders:
             return "Multiple Folders"
         case .other:
+            if let bundleID = item.sourceAppBundleID,
+               let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID),
+               let bundle = Bundle(url: appURL),
+               let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String {
+                return name
+            } else if let bundleID = item.sourceAppBundleID,
+                      let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+                // Fallback to filename if CFBundleName is missing
+                return appURL.deletingPathExtension().lastPathComponent
+            }
             return "Data"
         }
     }
@@ -372,15 +382,24 @@ struct ContentPreview: View {
                             .foregroundColor(Color.themeIconColor(for: colorScheme))
                     }
                     
-                    Text("Binary Data")
-                        .font(.custom("Inter", size: 14))
-                        .fontWeight(.medium)
-                        .foregroundColor(Color.themeTextPrimary(for: colorScheme))
-                    
-                    if let count = item.representations?.count {
-                        Text("\(count) types")
-                            .font(.custom("Inter", size: 12))
-                            .foregroundColor(Color.themeTextSecondary(for: colorScheme))
+                    if item.content != "Data" && !item.content.isEmpty {
+                         Text(item.content)
+                            .font(.custom("Inter", size: 14))
+                            .fontWeight(.regular)
+                            .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                            .lineLimit(6)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text("Binary Data")
+                            .font(.custom("Inter", size: 14))
+                            .fontWeight(.medium)
+                            .foregroundColor(Color.themeTextPrimary(for: colorScheme))
+                        
+                        if let count = item.representations?.count {
+                            Text("\(count) types")
+                                .font(.custom("Inter", size: 12))
+                                .foregroundColor(Color.themeTextSecondary(for: colorScheme))
+                        }
                     }
                 }
                 .padding(16)
