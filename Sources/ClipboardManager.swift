@@ -48,7 +48,7 @@ class ClipboardManager: ObservableObject {
             }
             
             // Check for Files/Folders FIRST (before images, because Finder provides both icon image and file URL)
-            if let fileURLs = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL], !fileURLs.isEmpty {
+            if let fileURLs = (pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL])?.filter({ $0.isFileURL }), !fileURLs.isEmpty {
                 if fileURLs.count == 1 {
                     let url = fileURLs[0]
                     var isDir: ObjCBool = false
