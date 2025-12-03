@@ -62,6 +62,26 @@ class ClipboardManager: ObservableObject {
                     }
                 }
                 
+                // Debug: Log captured clipboard types and content
+                print("\n=== CLIPBOARD CAPTURE ===")
+                print("Total types: \(allRepresentations.count)")
+                for (type, data) in allRepresentations {
+                    print("\n📋 Type: \(type.rawValue)")
+                    print("   Size: \(data.count) bytes")
+                    
+                    // Show FULL content for text-based formats (no truncation)
+                    let readableFormats = ["public.html", "public.rtf", "public.utf8-plain-text", "NSStringPboardType", "public.text", "public.utf16-plain-text"]
+                    if readableFormats.contains(type.rawValue) {
+                        if let content = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .utf16) {
+                            print("   Content:\n---")
+                            print(content)
+                            print("---")
+                        }
+                    } else {
+                        print("   (Binary data)")
+                    }
+                }
+                print("\n========================\n")
                 // Determine type and content
                 if let fileURLs = (pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL])?.filter({ $0.isFileURL }), !fileURLs.isEmpty {
                     if fileURLs.count == 1 {
