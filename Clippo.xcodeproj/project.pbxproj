@@ -1,0 +1,438 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0182CE3B09829B76C76BD72F /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5058ABD93EEDEA8EBD828F46 /* ClipboardManager.swift */; };
+		15D09742A61EB42EE4F39655 /* walkthrough-open.png in Resources */ = {isa = PBXBuildFile; fileRef = D05BD4AE52C285DCFE58E698 /* walkthrough-open.png */; };
+		16969C1067A1DCB4EC4349B0 /* icon-close.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E2AA460D10F9D6D3528E21 /* icon-close.png */; };
+		199B23577F3BB592BE91C13F /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D45FE054AE4299489AD107 /* MenuView.swift */; };
+		2230E6BF5D3111ACFDFF6A09 /* icon-text.png in Resources */ = {isa = PBXBuildFile; fileRef = 759C8AAB0474AFA559D3DB56 /* icon-text.png */; };
+		34DF853EF63943E34908214B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD36289F8EFF5FDE294D557 /* OnboardingView.swift */; };
+		41DF5A0A03A37E8E71525A25 /* permission-denied.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C8ABCE44EA8F8EF80C3451D /* permission-denied.png */; };
+		4515083621FE83DE120C909B /* icon-copy.png in Resources */ = {isa = PBXBuildFile; fileRef = CC3354DFA58EC096F2899619 /* icon-copy.png */; };
+		4D9BC4D8D9435AFF29103DE9 /* status-bar-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 099BE88B89759AF90DC9FE01 /* status-bar-icon.png */; };
+		54AE30B8341C2C1D59D30675 /* icon-image.png in Resources */ = {isa = PBXBuildFile; fileRef = AA5497D53B676F57D8C90A50 /* icon-image.png */; };
+		55C4AFB2EDF7938B89593EE9 /* HotKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB13D2719C6B1785BA59C9A6 /* HotKeyManager.swift */; };
+		61E20ECB8C75CADAAD217422 /* walkthrough-illustration.png in Resources */ = {isa = PBXBuildFile; fileRef = E5B893A8A564D1F2BE36F872 /* walkthrough-illustration.png */; };
+		65E93529955AFA6D5BAFE266 /* ClippoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D282266B403D4F153BE901 /* ClippoApp.swift */; };
+		6CA05F9C8C1FF8E592705DC9 /* OnboardingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70436A1999BD87F751FF6180 /* OnboardingWindowController.swift */; };
+		6DA37D63C8263AF2645EBEC5 /* icon-url.png in Resources */ = {isa = PBXBuildFile; fileRef = EFA1F69F83597F052BAF1AFB /* icon-url.png */; };
+		82524B990AEB8878DD0E8B47 /* AppIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A6222EA022CCD079EFD0864 /* AppIcon.png */; };
+		87AA497B92F613F0FE3E22E9 /* PasswordDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C07FC8E335BCFCEA95484B2 /* PasswordDetector.swift */; };
+		89068723F9EDC0341FA81791 /* permission-granted.png in Resources */ = {isa = PBXBuildFile; fileRef = ED0AD14AF6275639DEE39DCA /* permission-granted.png */; };
+		A65CE6E1B8145D68B8D8577F /* icon-code.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBB2D70D5AAA2434410BC5F /* icon-code.png */; };
+		AA3348F691577CAA230B45CE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F5DD65360BBD79FDAA91AD0 /* Assets.xcassets */; };
+		AA8BE33E41AE7F646652B1D6 /* icon-paste.png in Resources */ = {isa = PBXBuildFile; fileRef = 91EBFFA2373C1FF0AF8DAF2B /* icon-paste.png */; };
+		BD98E5480C959A219E55C81F /* IgnoredItemTooltip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F60275677C33B218BF9B85F /* IgnoredItemTooltip.swift */; };
+		C25C040813A0CB002D3A59BC /* OnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D47F943E5A105582F3F54ED /* OnboardingState.swift */; };
+		C3D9E7CF2FB6EC09258D9216 /* clippo-waving-hello.png in Resources */ = {isa = PBXBuildFile; fileRef = 177329FB32666E9404C4324D /* clippo-waving-hello.png */; };
+		C6D94E7B9059135247017014 /* walkthrough-paste.png in Resources */ = {isa = PBXBuildFile; fileRef = 6950EF88073A31091976A84C /* walkthrough-paste.png */; };
+		C84DAE7968F003DF969B640E /* icon-back.png in Resources */ = {isa = PBXBuildFile; fileRef = 5427753C72E4DE5FEB3BFD61 /* icon-back.png */; };
+		D4DCBE27E72B155BDEF3F4E7 /* OverlayWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 518B8BD209CE2F7EC4287B50 /* OverlayWindow.swift */; };
+		DFD9E288EF0D92F90868B4C5 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB7E0A113B2DBCC375557D6 /* SettingsWindowController.swift */; };
+		E574D60B14DD71F6E7870636 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4549FF4B3F3355BAEE49E485 /* ContentView.swift */; };
+		E583F628368885913404B338 /* walkthrough-navigate.png in Resources */ = {isa = PBXBuildFile; fileRef = 8B3F30090DAC853FB7AAA5F3 /* walkthrough-navigate.png */; };
+		EAC61E6D2ABB41E25DB574DB /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A59A75011CCC066132CC28 /* StatusBarController.swift */; };
+		F4B3788F87745C3F5843CBB2 /* permission-superpower.png in Resources */ = {isa = PBXBuildFile; fileRef = A4C4D676EEC8755AD877F9C0 /* permission-superpower.png */; };
+		F6CF1E7A23FCFE65803971BA /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30CD69D7DBD5ED56EF2CE88 /* ThemeManager.swift */; };
+		FC4BB499ED09DD11FC55FDD8 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F22BF3B08F4E4A946B7DE29B /* SettingsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		099BE88B89759AF90DC9FE01 /* status-bar-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "status-bar-icon.png"; sourceTree = "<group>"; };
+		177329FB32666E9404C4324D /* clippo-waving-hello.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clippo-waving-hello.png"; sourceTree = "<group>"; };
+		1F5DD65360BBD79FDAA91AD0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2C07FC8E335BCFCEA95484B2 /* PasswordDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordDetector.swift; sourceTree = "<group>"; };
+		34E2AA460D10F9D6D3528E21 /* icon-close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-close.png"; sourceTree = "<group>"; };
+		3C8ABCE44EA8F8EF80C3451D /* permission-denied.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "permission-denied.png"; sourceTree = "<group>"; };
+		4549FF4B3F3355BAEE49E485 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		5058ABD93EEDEA8EBD828F46 /* ClipboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardManager.swift; sourceTree = "<group>"; };
+		518B8BD209CE2F7EC4287B50 /* OverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindow.swift; sourceTree = "<group>"; };
+		5427753C72E4DE5FEB3BFD61 /* icon-back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-back.png"; sourceTree = "<group>"; };
+		59D45FE054AE4299489AD107 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		5B5F578091FD9D90E54EE456 /* Clippo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Clippo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6950EF88073A31091976A84C /* walkthrough-paste.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "walkthrough-paste.png"; sourceTree = "<group>"; };
+		6FD36289F8EFF5FDE294D557 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		70436A1999BD87F751FF6180 /* OnboardingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindowController.swift; sourceTree = "<group>"; };
+		759C8AAB0474AFA559D3DB56 /* icon-text.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-text.png"; sourceTree = "<group>"; };
+		7EBB2D70D5AAA2434410BC5F /* icon-code.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-code.png"; sourceTree = "<group>"; };
+		7F60275677C33B218BF9B85F /* IgnoredItemTooltip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IgnoredItemTooltip.swift; sourceTree = "<group>"; };
+		8B3F30090DAC853FB7AAA5F3 /* walkthrough-navigate.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "walkthrough-navigate.png"; sourceTree = "<group>"; };
+		8D47F943E5A105582F3F54ED /* OnboardingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingState.swift; sourceTree = "<group>"; };
+		91EBFFA2373C1FF0AF8DAF2B /* icon-paste.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-paste.png"; sourceTree = "<group>"; };
+		9A6222EA022CCD079EFD0864 /* AppIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon.png; sourceTree = "<group>"; };
+		A4C4D676EEC8755AD877F9C0 /* permission-superpower.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "permission-superpower.png"; sourceTree = "<group>"; };
+		AA5497D53B676F57D8C90A50 /* icon-image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-image.png"; sourceTree = "<group>"; };
+		B0D282266B403D4F153BE901 /* ClippoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClippoApp.swift; sourceTree = "<group>"; };
+		C0A59A75011CCC066132CC28 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		C30CD69D7DBD5ED56EF2CE88 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		CC3354DFA58EC096F2899619 /* icon-copy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-copy.png"; sourceTree = "<group>"; };
+		D05BD4AE52C285DCFE58E698 /* walkthrough-open.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "walkthrough-open.png"; sourceTree = "<group>"; };
+		DB13D2719C6B1785BA59C9A6 /* HotKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyManager.swift; sourceTree = "<group>"; };
+		E5B893A8A564D1F2BE36F872 /* walkthrough-illustration.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "walkthrough-illustration.png"; sourceTree = "<group>"; };
+		ECB7E0A113B2DBCC375557D6 /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
+		ED0AD14AF6275639DEE39DCA /* permission-granted.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "permission-granted.png"; sourceTree = "<group>"; };
+		EFA1F69F83597F052BAF1AFB /* icon-url.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-url.png"; sourceTree = "<group>"; };
+		F22BF3B08F4E4A946B7DE29B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0E86C4D0EF4823CCB61A60CD /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9A6222EA022CCD079EFD0864 /* AppIcon.png */,
+				177329FB32666E9404C4324D /* clippo-waving-hello.png */,
+				5427753C72E4DE5FEB3BFD61 /* icon-back.png */,
+				34E2AA460D10F9D6D3528E21 /* icon-close.png */,
+				7EBB2D70D5AAA2434410BC5F /* icon-code.png */,
+				CC3354DFA58EC096F2899619 /* icon-copy.png */,
+				AA5497D53B676F57D8C90A50 /* icon-image.png */,
+				91EBFFA2373C1FF0AF8DAF2B /* icon-paste.png */,
+				759C8AAB0474AFA559D3DB56 /* icon-text.png */,
+				EFA1F69F83597F052BAF1AFB /* icon-url.png */,
+				3C8ABCE44EA8F8EF80C3451D /* permission-denied.png */,
+				ED0AD14AF6275639DEE39DCA /* permission-granted.png */,
+				A4C4D676EEC8755AD877F9C0 /* permission-superpower.png */,
+				099BE88B89759AF90DC9FE01 /* status-bar-icon.png */,
+				E5B893A8A564D1F2BE36F872 /* walkthrough-illustration.png */,
+				8B3F30090DAC853FB7AAA5F3 /* walkthrough-navigate.png */,
+				D05BD4AE52C285DCFE58E698 /* walkthrough-open.png */,
+				6950EF88073A31091976A84C /* walkthrough-paste.png */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D2CA222DA4FC88193871630D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5B5F578091FD9D90E54EE456 /* Clippo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D99930EE9D9E46FA07661096 = {
+			isa = PBXGroup;
+			children = (
+				F41BB7F4ADB5F02B6D40DFEE /* Sources */,
+				D2CA222DA4FC88193871630D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F41BB7F4ADB5F02B6D40DFEE /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				1F5DD65360BBD79FDAA91AD0 /* Assets.xcassets */,
+				5058ABD93EEDEA8EBD828F46 /* ClipboardManager.swift */,
+				B0D282266B403D4F153BE901 /* ClippoApp.swift */,
+				4549FF4B3F3355BAEE49E485 /* ContentView.swift */,
+				DB13D2719C6B1785BA59C9A6 /* HotKeyManager.swift */,
+				7F60275677C33B218BF9B85F /* IgnoredItemTooltip.swift */,
+				59D45FE054AE4299489AD107 /* MenuView.swift */,
+				8D47F943E5A105582F3F54ED /* OnboardingState.swift */,
+				6FD36289F8EFF5FDE294D557 /* OnboardingView.swift */,
+				70436A1999BD87F751FF6180 /* OnboardingWindowController.swift */,
+				518B8BD209CE2F7EC4287B50 /* OverlayWindow.swift */,
+				2C07FC8E335BCFCEA95484B2 /* PasswordDetector.swift */,
+				F22BF3B08F4E4A946B7DE29B /* SettingsView.swift */,
+				ECB7E0A113B2DBCC375557D6 /* SettingsWindowController.swift */,
+				C0A59A75011CCC066132CC28 /* StatusBarController.swift */,
+				C30CD69D7DBD5ED56EF2CE88 /* ThemeManager.swift */,
+				0E86C4D0EF4823CCB61A60CD /* Resources */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F754989789517D9FFAE42A7C /* Clippo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9FEE25B67336A3E6D587B8C1 /* Build configuration list for PBXNativeTarget "Clippo" */;
+			buildPhases = (
+				CD04A9EED05956B4CA96DF8D /* Sources */,
+				7FCDA756CB12A8005CC923F3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Clippo;
+			packageProductDependencies = (
+			);
+			productName = Clippo;
+			productReference = 5B5F578091FD9D90E54EE456 /* Clippo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		240E2130B0EE36347AD1E34F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+			};
+			buildConfigurationList = BE1334D308F6FF1533CC0353 /* Build configuration list for PBXProject "Clippo" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D99930EE9D9E46FA07661096;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F754989789517D9FFAE42A7C /* Clippo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7FCDA756CB12A8005CC923F3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				82524B990AEB8878DD0E8B47 /* AppIcon.png in Resources */,
+				AA3348F691577CAA230B45CE /* Assets.xcassets in Resources */,
+				C3D9E7CF2FB6EC09258D9216 /* clippo-waving-hello.png in Resources */,
+				C84DAE7968F003DF969B640E /* icon-back.png in Resources */,
+				16969C1067A1DCB4EC4349B0 /* icon-close.png in Resources */,
+				A65CE6E1B8145D68B8D8577F /* icon-code.png in Resources */,
+				4515083621FE83DE120C909B /* icon-copy.png in Resources */,
+				54AE30B8341C2C1D59D30675 /* icon-image.png in Resources */,
+				AA8BE33E41AE7F646652B1D6 /* icon-paste.png in Resources */,
+				2230E6BF5D3111ACFDFF6A09 /* icon-text.png in Resources */,
+				6DA37D63C8263AF2645EBEC5 /* icon-url.png in Resources */,
+				41DF5A0A03A37E8E71525A25 /* permission-denied.png in Resources */,
+				89068723F9EDC0341FA81791 /* permission-granted.png in Resources */,
+				F4B3788F87745C3F5843CBB2 /* permission-superpower.png in Resources */,
+				4D9BC4D8D9435AFF29103DE9 /* status-bar-icon.png in Resources */,
+				61E20ECB8C75CADAAD217422 /* walkthrough-illustration.png in Resources */,
+				E583F628368885913404B338 /* walkthrough-navigate.png in Resources */,
+				15D09742A61EB42EE4F39655 /* walkthrough-open.png in Resources */,
+				C6D94E7B9059135247017014 /* walkthrough-paste.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CD04A9EED05956B4CA96DF8D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0182CE3B09829B76C76BD72F /* ClipboardManager.swift in Sources */,
+				65E93529955AFA6D5BAFE266 /* ClippoApp.swift in Sources */,
+				E574D60B14DD71F6E7870636 /* ContentView.swift in Sources */,
+				55C4AFB2EDF7938B89593EE9 /* HotKeyManager.swift in Sources */,
+				BD98E5480C959A219E55C81F /* IgnoredItemTooltip.swift in Sources */,
+				199B23577F3BB592BE91C13F /* MenuView.swift in Sources */,
+				C25C040813A0CB002D3A59BC /* OnboardingState.swift in Sources */,
+				34DF853EF63943E34908214B /* OnboardingView.swift in Sources */,
+				6CA05F9C8C1FF8E592705DC9 /* OnboardingWindowController.swift in Sources */,
+				D4DCBE27E72B155BDEF3F4E7 /* OverlayWindow.swift in Sources */,
+				87AA497B92F613F0FE3E22E9 /* PasswordDetector.swift in Sources */,
+				FC4BB499ED09DD11FC55FDD8 /* SettingsView.swift in Sources */,
+				DFD9E288EF0D92F90868B4C5 /* SettingsWindowController.swift in Sources */,
+				EAC61E6D2ABB41E25DB574DB /* StatusBarController.swift in Sources */,
+				F6CF1E7A23FCFE65803971BA /* ThemeManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4C98CC750AC29BBB7AADB383 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		827E8DA56463E3F243A452CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Clippo needs access to simulate paste operations to automatically paste clipboard content into other applications.";
+				INFOPLIST_KEY_NSHighResolutionCapable = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clippo.macos;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		9C6C986191ED8F197B4CAB49 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		9EC4A6809B459872BD3B83D2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Clippo needs access to simulate paste operations to automatically paste clipboard content into other applications.";
+				INFOPLIST_KEY_NSHighResolutionCapable = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clippo.macos;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9FEE25B67336A3E6D587B8C1 /* Build configuration list for PBXNativeTarget "Clippo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				827E8DA56463E3F243A452CA /* Debug */,
+				9EC4A6809B459872BD3B83D2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BE1334D308F6FF1533CC0353 /* Build configuration list for PBXProject "Clippo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C6C986191ED8F197B4CAB49 /* Debug */,
+				4C98CC750AC29BBB7AADB383 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 240E2130B0EE36347AD1E34F /* Project object */;
+}

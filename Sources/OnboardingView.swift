@@ -13,7 +13,7 @@ struct OnboardingIconButton: View {
                 .fill(isHovering ? Color(hex: "F5F5F5") : Color.clear)
             
             // Icon
-            if let imagePath = Bundle.module.path(forResource: icon, ofType: "png", inDirectory: "Resources"),
+            if let imagePath = Bundle.main.path(forResource: icon, ofType: "png"),
                let nsImage = NSImage(contentsOfFile: imagePath) {
                 Image(nsImage: nsImage)
                     .resizable()
@@ -166,7 +166,7 @@ struct HelloStep: View {
                     Spacer()
                     
                     // Clippo Illustration
-                    if let imagePath = Bundle.module.path(forResource: "clippo-waving-hello", ofType: "png", inDirectory: "Resources"),
+                    if let imagePath = Bundle.main.path(forResource: "clippo-waving-hello", ofType: "png"),
                        let clippoImage = NSImage(contentsOfFile: imagePath) {
                         Image(nsImage: clippoImage)
                             .resizable()
@@ -280,7 +280,7 @@ struct WalkthroughStep1: View {
                     VStack(spacing: 24) {
                         // Illustration
                         Group {
-                            if let imagePath = Bundle.module.path(forResource: "walkthrough-illustration", ofType: "png", inDirectory: "Resources"),
+                            if let imagePath = Bundle.main.path(forResource: "walkthrough-illustration", ofType: "png"),
                                let illustrationImage = NSImage(contentsOfFile: imagePath) {
                                 Image(nsImage: illustrationImage)
                                     .resizable()
@@ -417,7 +417,7 @@ struct WalkthroughStep2: View {
                     VStack(spacing: 24) {
                         // Illustration
                         Group {
-                            if let imagePath = Bundle.module.path(forResource: "walkthrough-open", ofType: "png", inDirectory: "Resources"),
+                            if let imagePath = Bundle.main.path(forResource: "walkthrough-open", ofType: "png"),
                                let illustrationImage = NSImage(contentsOfFile: imagePath) {
                                 Image(nsImage: illustrationImage)
                                     .resizable()
@@ -555,7 +555,7 @@ struct WalkthroughStep3: View {
                     VStack(spacing: 24) {
                         // Illustration
                         Group {
-                            if let imagePath = Bundle.module.path(forResource: "walkthrough-navigate", ofType: "png", inDirectory: "Resources"),
+                            if let imagePath = Bundle.main.path(forResource: "walkthrough-navigate", ofType: "png"),
                                let illustrationImage = NSImage(contentsOfFile: imagePath) {
                                 Image(nsImage: illustrationImage)
                                     .resizable()
@@ -691,7 +691,7 @@ struct WalkthroughStep4: View {
                     VStack(spacing: 24) {
                         // Illustration
                         Group {
-                            if let imagePath = Bundle.module.path(forResource: "walkthrough-paste", ofType: "png", inDirectory: "Resources"),
+                            if let imagePath = Bundle.main.path(forResource: "walkthrough-paste", ofType: "png"),
                                let illustrationImage = NSImage(contentsOfFile: imagePath) {
                                 Image(nsImage: illustrationImage)
                                     .resizable()
@@ -834,7 +834,7 @@ struct PermissionStep: View {
                     
                     VStack(spacing: 24) {
                         // Illustration
-                        if let imagePath = Bundle.module.path(forResource: "permission-superpower", ofType: "png", inDirectory: "Resources"),
+                        if let imagePath = Bundle.main.path(forResource: "permission-superpower", ofType: "png"),
                            let illustrationImage = NSImage(contentsOfFile: imagePath) {
                             Image(nsImage: illustrationImage)
                                 .resizable()
@@ -976,7 +976,7 @@ struct PermissionGrantedStep: View {
                     
                     VStack(spacing: 24) {
                         // Illustration
-                        if let imagePath = Bundle.module.path(forResource: "permission-granted", ofType: "png", inDirectory: "Resources"),
+                        if let imagePath = Bundle.main.path(forResource: "permission-granted", ofType: "png"),
                            let illustrationImage = NSImage(contentsOfFile: imagePath) {
                             Image(nsImage: illustrationImage)
                                 .resizable()
@@ -1061,7 +1061,7 @@ struct PermissionDeniedStep: View {
                     
                     VStack(spacing: 24) {
                         // Illustration
-                        if let imagePath = Bundle.module.path(forResource: "permission-denied", ofType: "png", inDirectory: "Resources"),
+                        if let imagePath = Bundle.main.path(forResource: "permission-denied", ofType: "png"),
                            let illustrationImage = NSImage(contentsOfFile: imagePath) {
                             Image(nsImage: illustrationImage)
                                 .resizable()
