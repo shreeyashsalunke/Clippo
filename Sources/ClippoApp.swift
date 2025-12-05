@@ -29,11 +29,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindow: OverlayWindow!
     var hostingController: NSHostingController<ContentView>!
     var isPasting: Bool = false {
-        didSet { updateView() }
+        didSet {
+            DispatchQueue.main.async {
+                self.updateView()
+            }
+        }
     }
     
     var selectionIndex: Int = 0 {
-        didSet { updateView() }
+        didSet {
+            DispatchQueue.main.async {
+                self.updateView()
+            }
+        }
     }
     
     // Onboarding
@@ -66,7 +74,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applyAppearance() {
         // Force view update to pick up new appearance from ThemeManager
         if hostingController != nil {
-            updateView()
+            DispatchQueue.main.async {
+                self.updateView()
+            }
         }
     }
     
