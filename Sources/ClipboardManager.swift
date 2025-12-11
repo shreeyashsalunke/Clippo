@@ -76,9 +76,15 @@ class ClipboardManager: ObservableObject {
             }
             // Check for Image
             else if let data = pasteboard.data(forType: .tiff) {
-                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: nil, type: .image, format: .tiff)
+                let reps = getAllRepresentations()
+                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .tiff)
             } else if let data = pasteboard.data(forType: .png) {
-                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: nil, type: .image, format: .png)
+                let reps = getAllRepresentations()
+                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .png)
+            } else if let data = pasteboard.data(forType: .pdf) {
+                // PDF support - treat as image for preview
+                let reps = getAllRepresentations()
+                handleNewClipboardItem(content: "PDF content", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .pdf)
             }
             // Check for Text
             else if let str = pasteboard.string(forType: .string) {
@@ -90,7 +96,8 @@ class ClipboardManager: ObservableObject {
                 }
                 
                 let detectedType = detectTextType(str)
-                handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: nil, type: detectedType, format: .string)
+                let reps = getAllRepresentations()
+                handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: reps, type: detectedType, format: .string)
             }
             // Fallback: Capture everything else
             else {
@@ -107,6 +114,16 @@ class ClipboardManager: ObservableObject {
                 }
             }
         }
+    }
+    
+    private func getAllRepresentations() -> [NSPasteboard.PasteboardType: Data] {
+        var reps: [NSPasteboard.PasteboardType: Data] = [:]
+        for type in pasteboard.types ?? [] {
+            if let data = pasteboard.data(forType: type) {
+                reps[type] = data
+            }
+        }
+        return reps
     }
     
     private func detectTextType(_ text: String) -> ClipboardItemType {

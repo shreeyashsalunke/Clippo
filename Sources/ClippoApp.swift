@@ -302,14 +302,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         
-        if item.type == .image, let data = item.imageData {
-            pasteboard.setData(data, forType: item.format)
-        } else if (item.type == .file || item.type == .folder || item.type == .files || item.type == .folders), let urls = item.fileURLs {
+        if (item.type == .file || item.type == .folder || item.type == .files || item.type == .folders), let urls = item.fileURLs {
             pasteboard.writeObjects(urls as [NSPasteboardWriting])
-        } else if item.type == .other, let reps = item.representations {
+        } else if let reps = item.representations, !reps.isEmpty {
+            // Best practice: Write all available representations to preserve fidelity (e.g. Figma layers key + Text)
             for (type, data) in reps {
                 pasteboard.setData(data, forType: type)
             }
+        } else if item.type == .image, let data = item.imageData {
+            pasteboard.setData(data, forType: item.format)
         } else {
             pasteboard.setString(item.content, forType: .string)
         }
