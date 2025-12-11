@@ -97,7 +97,21 @@ class ClipboardManager: ObservableObject {
                 
                 let detectedType = detectTextType(str)
                 let reps = getAllRepresentations()
-                handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: reps, type: detectedType, format: .string)
+                
+                // Heuristic: If it's detected as plain text (not code/url), check if we have proprietary data.
+                // If so, upgrade it to .other (Application Data) to preserve the rich context (like Figma layers).
+                var finalType = detectedType
+                if detectedType == .text {
+                    let hasProprietaryData = pasteboard.types?.contains(where: { isProprietaryType($0) }) ?? false
+                    if hasProprietaryData {
+                        finalType = .other
+                    }
+                }
+                
+                // Capture source app for icon display
+                let sourceApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+                
+                handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: reps, sourceAppBundleID: sourceApp, type: finalType, format: .string)
             }
             // Fallback: Capture everything else
             else {
@@ -126,6 +140,21 @@ class ClipboardManager: ObservableObject {
         return reps
     }
     
+    private func isProprietaryType(_ type: NSPasteboard.PasteboardType) -> Bool {
+        let typeString = type.rawValue
+        
+        // Standard interchangeable types (allowlist)
+        if typeString.hasPrefix("public.") || // public.utf8-plain-text, public.png, etc.
+           typeString.hasPrefix("com.apple.") || // com.apple.webarchive, etc.
+           typeString.hasPrefix("dyn.") || // Dynamic system types
+           typeString == "NeXT RTFD pasteboard type" {
+            return false
+        }
+        
+        // Everything else is likely proprietary (e.g. com.figma.node, com.adobe.pdf, etc.)
+        return true
+    }
+
     private func detectTextType(_ text: String) -> ClipboardItemType {
         // Trim whitespace for cleaner detection
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -172,8 +201,9 @@ class ClipboardManager: ObservableObject {
                 // For files/folders, compare URLs
                 return item.type == type && existingURLs == newURLs
             } else if type == .other, let newReps = representations, let existingReps = item.representations {
-                // For other, compare representations count and keys (simplified check)
-                return item.type == .other && newReps.keys == existingReps.keys && newReps.count == existingReps.count
+                // Strict check: Compare actual data to distinguish between different binary objects (e.g. diff Figma layers).
+                // Do NOT revert to simple key checking as it causes data loss for rich content.
+                return item.type == .other && newReps == existingReps
             }
             return false
         }) {
