@@ -112,4 +112,10 @@ https://github.com/[yourusername]/clippo
 
 ---
 
+### AI Development Disclaimer
+This tool was "vibe coded" and built with the assistance of Artificial Intelligence (AI). While we strive for accuracy and reliability, AI-generated code may contain errors, bugs, or unintended behaviors. Users are advised to use this software with this understanding. We assume no liability for any issues arising from the use of this software.
+
+---
+
 **Summary**: Clippo works entirely on your device. Your clipboard data stays on your Mac, in memory only, and is never sent anywhere. Period.
+
