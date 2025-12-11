@@ -145,6 +145,7 @@ struct ClipboardCard: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .frame(height: 64)
+            .background(colorScheme == .light ? Color(hex: "FFF0D0") : Color.clear)
             
             // Content Preview
             ContentPreview(item: item)
@@ -233,9 +234,19 @@ struct IconBadge: View {
                     .opacity(0.6)
                     .frame(width: 24, height: 24)
             } else {
-                Image(systemName: iconName)
-                    .font(.system(size: 20, weight: .regular))
-                    .foregroundColor(Color.themeIconColor(for: colorScheme))
+                // Try to find the image in the module bundle (SwiftPM) with the "Resources" subdirectory
+                // Since we used .copy("Resources") in Package.swift, the files are nested.
+                if let path = Bundle.module.path(forResource: iconName, ofType: "png", inDirectory: "Resources"),
+                   let iconImage = NSImage(contentsOfFile: path) {
+                    Image(nsImage: iconImage)
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                } else {
+                    // Fallback to system if image missing
+                    Image(systemName: "questionmark")
+                       .font(.system(size: 20, weight: .regular))
+                       .foregroundColor(Color.themeIconColor(for: colorScheme))
+                }
             }
         }
         .frame(width: 40, height: 40)
@@ -244,23 +255,23 @@ struct IconBadge: View {
     var iconName: String {
         switch item.type {
         case .text:
-            return "textformat"
+            return "icon-text"
         case .code:
-            return "chevron.left.forwardslash.chevron.right"
+            return "icon-code"
         case .url:
-            return "link"
+            return "icon-url"
         case .image:
-            return "photo"
+            return "icon-image"
         case .file:
-            return "doc"
+            return "icon-file"
         case .folder:
-            return "folder"
+            return "icon-folder"
         case .files:
-            return "doc.on.doc"
+            return "icon-files"
         case .folders:
-            return "folder.badge.plus"
+             return "icon-folders"
         case .other:
-            return "cube.box"
+            return "icon-file" // Default to file icon for other data
         }
     }
 }
