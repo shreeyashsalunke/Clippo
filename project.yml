@@ -15,6 +15,7 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.clippo.macos
       INFOPLIST_FILE: Info.plist
+      ENTITLEMENTS_FILE: Clippo.entitlements
       ENABLE_HARDENED_RUNTIME: true
       CODE_SIGN_IDENTITY: "-"
       PRODUCT_NAME: Clippo
