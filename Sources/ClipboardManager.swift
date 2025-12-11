@@ -32,101 +32,132 @@ class ClipboardManager: ObservableObject {
         if pasteboard.changeCount != lastChangeCount {
             lastChangeCount = pasteboard.changeCount
             
-            // Check if password protection is enabled
-            let isPasswordProtectionEnabled = UserDefaults.standard.bool(forKey: "passwordProtectionEnabled")
-            
-            if isPasswordProtectionEnabled {
-                // Get frontmost app for filtering
-                let frontmostBundleID = PasswordDetector.getFrontmostAppBundleID()
+            // Performance: Move heavy pasteboard reading to background thread
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else { return }
                 
-                // Check if we should ignore based on source app
-                if PasswordDetector.shouldIgnoreFromApp(frontmostBundleID) {
-                    lastIgnoredReason = "Clippo ignores clipboard copies from password managers for your privacy."
-                    print("Ignored clipboard from password manager: \(frontmostBundleID ?? "unknown")")
-                    return
-                }
-            }
-            
-            // Check for Files/Folders FIRST (before images, because Finder provides both icon image and file URL)
-            if let fileURLs = (pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL])?.filter({ $0.isFileURL }), !fileURLs.isEmpty {
-                if fileURLs.count == 1 {
-                    let url = fileURLs[0]
-                    var isDir: ObjCBool = false
-                    FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+                // Read everything on background thread
+                
+                // Check if password protection is enabled
+                let isPasswordProtectionEnabled = UserDefaults.standard.bool(forKey: "passwordProtectionEnabled")
+                
+                if isPasswordProtectionEnabled {
+                    // Get frontmost app for filtering
+                    let frontmostBundleID = PasswordDetector.getFrontmostAppBundleID()
                     
-                    if isDir.boolValue {
-                        handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: nil, type: .folder, format: .fileURL)
-                    } else {
-                        handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: nil, type: .file, format: .fileURL)
+                    // Check if we should ignore based on source app
+                    if PasswordDetector.shouldIgnoreFromApp(frontmostBundleID) {
+                        DispatchQueue.main.async {
+                            self.lastIgnoredReason = "Clippo ignores clipboard copies from password managers for your privacy."
+                        }
+                        #if DEBUG
+                        print("Ignored clipboard from password manager: \(frontmostBundleID ?? "unknown")")
+                        #endif
+                        return
                     }
-                } else {
-                    // Multiple items
-                    let allFolders = fileURLs.allSatisfy { url in
+                }
+                
+                // Check for Files/Folders FIRST
+                if let fileURLs = (self.pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL])?.filter({ $0.isFileURL }), !fileURLs.isEmpty {
+                    if fileURLs.count == 1 {
+                        let url = fileURLs[0]
                         var isDir: ObjCBool = false
                         FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
-                        return isDir.boolValue
+                        
+                        DispatchQueue.main.async {
+                            if isDir.boolValue {
+                                self.handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: nil, type: .folder, format: .fileURL)
+                            } else {
+                                self.handleNewClipboardItem(content: url.lastPathComponent, imageData: nil, fileURLs: fileURLs, representations: nil, type: .file, format: .fileURL)
+                            }
+                        }
+                    } else {
+                        // Multiple items
+                        let allFolders = fileURLs.allSatisfy { url in
+                            var isDir: ObjCBool = false
+                            FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+                            return isDir.boolValue
+                        }
+                        
+                        DispatchQueue.main.async {
+                            if allFolders {
+                                self.handleNewClipboardItem(content: "\(fileURLs.count) Folders", imageData: nil, fileURLs: fileURLs, representations: nil, type: .folders, format: .fileURL)
+                            } else {
+                                self.handleNewClipboardItem(content: "\(fileURLs.count) Files", imageData: nil, fileURLs: fileURLs, representations: nil, type: .files, format: .fileURL)
+                            }
+                        }
+                    }
+                }
+                // Check for Image
+                else if let data = self.pasteboard.data(forType: .tiff) {
+                    let reps = self.getAllRepresentations()
+                    DispatchQueue.main.async {
+                        self.handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .tiff)
+                    }
+                } else if let data = self.pasteboard.data(forType: .png) {
+                    let reps = self.getAllRepresentations()
+                    DispatchQueue.main.async {
+                        self.handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .png)
+                    }
+                } else if let data = self.pasteboard.data(forType: .pdf) {
+                    // PDF support - treat as image for preview
+                    let reps = self.getAllRepresentations()
+                    DispatchQueue.main.async {
+                        self.handleNewClipboardItem(content: "PDF content", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .pdf)
+                    }
+                }
+                // Check for Text
+                else if let str = self.pasteboard.string(forType: .string) {
+                    // Check if content looks like a password/secret (only if protection is enabled)
+                    if isPasswordProtectionEnabled && PasswordDetector.isLikelySecret(str) {
+                        DispatchQueue.main.async {
+                            self.lastIgnoredReason = "Clippo ignores clipboard copies from password managers for your privacy."
+                        }
+                        #if DEBUG
+                        // Security: Mask the password content in logs
+                        print("Ignored password-like content: [HIDDEN] (length: \(str.count))")
+                        #endif
+                        return
                     }
                     
-                    if allFolders {
-                        handleNewClipboardItem(content: "\(fileURLs.count) Folders", imageData: nil, fileURLs: fileURLs, representations: nil, type: .folders, format: .fileURL)
-                    } else {
-                        handleNewClipboardItem(content: "\(fileURLs.count) Files", imageData: nil, fileURLs: fileURLs, representations: nil, type: .files, format: .fileURL)
+                    let detectedType = self.detectTextType(str)
+                    let reps = self.getAllRepresentations()
+                    
+                    // Heuristic: If it's detected as plain text (not code/url), check if we have proprietary data.
+                    // If so, upgrade it to .other (Application Data) to preserve the rich context (like Figma layers).
+                    var finalType = detectedType
+                    if detectedType == .text {
+                        let hasProprietaryData = self.pasteboard.types?.contains(where: { self.isProprietaryType($0) }) ?? false
+                        if hasProprietaryData {
+                            finalType = .other
+                        }
                     }
-                }
-            }
-            // Check for Image
-            else if let data = pasteboard.data(forType: .tiff) {
-                let reps = getAllRepresentations()
-                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .tiff)
-            } else if let data = pasteboard.data(forType: .png) {
-                let reps = getAllRepresentations()
-                handleNewClipboardItem(content: "Image", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .png)
-            } else if let data = pasteboard.data(forType: .pdf) {
-                // PDF support - treat as image for preview
-                let reps = getAllRepresentations()
-                handleNewClipboardItem(content: "PDF content", imageData: data, fileURLs: nil, representations: reps, type: .image, format: .pdf)
-            }
-            // Check for Text
-            else if let str = pasteboard.string(forType: .string) {
-                // Check if content looks like a password/secret (only if protection is enabled)
-                if isPasswordProtectionEnabled && PasswordDetector.isLikelySecret(str) {
-                    lastIgnoredReason = "Clippo ignores clipboard copies from password managers for your privacy."
-                    print("Ignored password-like content: \(str.prefix(10))...")
-                    return
-                }
-                
-                let detectedType = detectTextType(str)
-                let reps = getAllRepresentations()
-                
-                // Heuristic: If it's detected as plain text (not code/url), check if we have proprietary data.
-                // If so, upgrade it to .other (Application Data) to preserve the rich context (like Figma layers).
-                var finalType = detectedType
-                if detectedType == .text {
-                    let hasProprietaryData = pasteboard.types?.contains(where: { isProprietaryType($0) }) ?? false
-                    if hasProprietaryData {
-                        finalType = .other
-                    }
-                }
-                
-                // Capture source app for icon display
-                let sourceApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-                
-                handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: reps, sourceAppBundleID: sourceApp, type: finalType, format: .string)
-            }
-            // Fallback: Capture everything else
-            else {
-                var reps: [NSPasteboard.PasteboardType: Data] = [:]
-                for type in pasteboard.types ?? [] {
-                    if let data = pasteboard.data(forType: type) {
-                        reps[type] = data
-                    }
-                }
-                
-                if !reps.isEmpty {
+                    
+                    // Capture source app for icon display
                     let sourceApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-                    handleNewClipboardItem(content: "Data", imageData: nil, fileURLs: nil, representations: reps, sourceAppBundleID: sourceApp, type: .other, format: .string)
+                    
+                    DispatchQueue.main.async {
+                        self.handleNewClipboardItem(content: str, imageData: nil, fileURLs: nil, representations: reps, sourceAppBundleID: sourceApp, type: finalType, format: .string)
+                    }
                 }
-            }
+                // Fallback: Capture everything else
+                else {
+                    var reps: [NSPasteboard.PasteboardType: Data] = [:]
+                    for type in self.pasteboard.types ?? [] {
+                        if let data = self.pasteboard.data(forType: type) {
+                            reps[type] = data
+                        }
+                    }
+                    
+                    if !reps.isEmpty {
+                        let sourceApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+                        
+                        DispatchQueue.main.async {
+                            self.handleNewClipboardItem(content: "Data", imageData: nil, fileURLs: nil, representations: reps, sourceAppBundleID: sourceApp, type: .other, format: .string)
+                        }
+                    }
+                }
+            } // End of background dispatch
         }
     }
     
