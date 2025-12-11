@@ -18,21 +18,6 @@ Clippo is a modern, lightweight, and secure clipboard manager for macOS. It help
 
 - macOS 12.0 or later
 
-## Installation
-
-### From Source
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/shreeyashsalunke/Clippo.git
-   ```
-2. Open the project in Xcode:
-   ```bash
-   cd Clippo
-   open Clippo.xcodeproj
-   ```
-3. Build and Run the `Clippo` target.
-
 ## Usage
 
 1. Launch Clippo.
