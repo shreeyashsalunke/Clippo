@@ -25,7 +25,7 @@ enum AppAppearance: String, CaseIterable {
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, OverlayWindowDelegate {
     var overlayWindow: OverlayWindow!
     var hostingController: NSHostingController<ContentView>!
     var isPasting: Bool = false {
@@ -94,6 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         hostingController = NSHostingController(rootView: contentView)
         
         overlayWindow = OverlayWindow()
+        overlayWindow.overlayDelegate = self
         overlayWindow.contentViewController = hostingController
         overlayWindow.setFrame(NSRect(x: 0, y: 0, width: 1504, height: 420), display: true)
         overlayWindow.center()
@@ -359,6 +360,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
         if let url = URL(string: urlString) {
             NSWorkspace.shared.open(url)
+        }
+    }
+    
+    // MARK: - OverlayWindowDelegate
+    
+    func navigateNext() {
+        let count = ClipboardManager.shared.history.count
+        if count > 0 {
+            selectionIndex = (selectionIndex + 1) % count
+            resetHideTimer()
+        }
+    }
+    
+    func navigatePrevious() {
+        let count = ClipboardManager.shared.history.count
+        if count > 0 {
+            selectionIndex = (selectionIndex - 1 + count) % count
+            resetHideTimer()
+        }
+    }
+    
+    func resetHideTimer() {
+        hideTimer?.invalidate()
+        hideTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+            self?.dismissOverlay()
         }
     }
 }

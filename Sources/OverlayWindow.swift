@@ -1,7 +1,14 @@
 import SwiftUI
 import AppKit
 
+protocol OverlayWindowDelegate: AnyObject {
+    func navigateNext()
+    func navigatePrevious()
+}
+
 class OverlayWindow: NSPanel {
+    weak var overlayDelegate: OverlayWindowDelegate?
+
     init() {
         super.init(contentRect: .zero,
                    styleMask: [.nonactivatingPanel, .borderless],
@@ -26,5 +33,15 @@ class OverlayWindow: NSPanel {
     
     override var canBecomeMain: Bool {
         return true
+    }
+    
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 124 { // Right Arrow
+            overlayDelegate?.navigateNext()
+        } else if event.keyCode == 123 { // Left Arrow
+            overlayDelegate?.navigatePrevious()
+        } else {
+            super.keyDown(with: event)
+        }
     }
 }
