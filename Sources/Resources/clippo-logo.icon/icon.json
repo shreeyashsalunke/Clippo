@@ -8,7 +8,7 @@
         {
           "blend-mode" : "normal",
           "fill" : "automatic",
-          "glass" : true,
+          "glass" : false,
           "hidden-specializations" : [
             {
               "value" : false

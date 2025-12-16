@@ -26,6 +26,8 @@
     <string>Clippo needs access to simulate paste operations to automatically paste clipboard content into other applications.</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
 </dict>
