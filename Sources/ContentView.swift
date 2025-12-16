@@ -234,10 +234,7 @@ struct IconBadge: View {
                     .opacity(0.6)
                     .frame(width: 24, height: 24)
             } else {
-                // Try to find the image in the module bundle (SwiftPM) with the "Resources" subdirectory
-                // Since we used .copy("Resources") in Package.swift, the files are nested.
-                if let path = Bundle.module.path(forResource: iconName, ofType: "png", inDirectory: "Resources"),
-                   let iconImage = NSImage(contentsOfFile: path) {
+                if let iconImage = loadIconImage(named: iconName) {
                     Image(nsImage: iconImage)
                         .resizable()
                         .frame(width: 20, height: 20)
@@ -480,7 +477,8 @@ struct PasteButton: View {
                 Image(systemName: "checkmark")
                     .font(.system(size: 14, weight: .semibold))
             } else {
-                if let iconImage = NSImage(contentsOfFile: Bundle.main.path(forResource: hasAccessibilityPermission ? "icon-paste" : "icon-copy", ofType: "png") ?? "") {
+                let iconName = hasAccessibilityPermission ? "icon-paste" : "icon-copy"
+                if let iconImage = loadIconImage(named: iconName) {
                     Image(nsImage: iconImage)
                         .resizable()
                         .frame(width: 16, height: 16)
@@ -643,4 +641,26 @@ extension Color {
     static func themeSelectionRing(for scheme: ColorScheme) -> Color {
         scheme == .dark ? Color(hex: "5FB3C1") : Color(hex: "27727F")
     }
+}
+
+private func loadIconImage(named name: String) -> NSImage? {
+    // 1. Try Bundle.module with "Resources" subdirectory
+    if let path = Bundle.module.path(forResource: name, ofType: "png", inDirectory: "Resources"),
+       let image = NSImage(contentsOfFile: path) {
+        return image
+    }
+    
+    // 2. Try Bundle.module at root
+    if let path = Bundle.module.path(forResource: name, ofType: "png"),
+       let image = NSImage(contentsOfFile: path) {
+        return image
+    }
+    
+    // 3. Try Bundle.main
+    if let path = Bundle.main.path(forResource: name, ofType: "png"),
+       let image = NSImage(contentsOfFile: path) {
+        return image
+    }
+    
+    return nil
 }

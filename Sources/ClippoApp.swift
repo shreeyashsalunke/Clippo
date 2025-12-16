@@ -48,10 +48,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, OverlayWindowDelegate {
     }
     
     func updateView() {
-        hostingController.rootView = ContentView(
-            selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }),
-            isPasting: Binding(get: { self.isPasting }, set: { self.isPasting = $0 })
-        )
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.hostingController.rootView = ContentView(
+                selectionIndex: Binding(get: { self.selectionIndex }, set: { self.selectionIndex = $0 }),
+                isPasting: Binding(get: { self.isPasting }, set: { self.isPasting = $0 })
+            )
+        }
     }
     
     var currentAppearance: AppAppearance {
@@ -258,11 +261,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, OverlayWindowDelegate {
     func handleFlagsChanged(_ event: NSEvent) {
         guard overlayWindow.isVisible else { return }
         
-        // Check if BOTH Cmd AND Shift are released
+        // Only check if Cmd is released
         let hasCommand = event.modifierFlags.contains(.command)
-        let hasShift = event.modifierFlags.contains(.shift)
         
-        if !hasCommand || !hasShift {
+        if !hasCommand {
             if isPasting { return }
             
             // Trigger animation

@@ -25,7 +25,8 @@ let package = Package(
                 "IgnoredItemTooltip.swift",
                 "MenuView.swift",
                 "StatusBarController.swift",
-                "ThemeManager.swift"
+                "ThemeManager.swift",
+                "Bundle+Extensions.swift"
             ],
             resources: [
                 .copy("Resources")
