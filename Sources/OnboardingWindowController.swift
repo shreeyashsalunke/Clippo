@@ -6,8 +6,8 @@ class OnboardingWindowController: NSWindowController {
     private let onboardingState = OnboardingState()
     
     convenience init() {
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 524, height: 600),
+        let window = OnboardingWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 424, height: 552),
             styleMask: [.borderless, .miniaturizable],
             backing: .buffered,
             defer: false
@@ -38,5 +38,11 @@ class OnboardingWindowController: NSWindowController {
         showWindow(nil)
         window?.center()
         NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
+class OnboardingWindow: NSWindow {
+    override var canBecomeKey: Bool {
+        return true
     }
 }
